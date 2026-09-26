@@ -1049,6 +1049,89 @@ function drawTrail(delta = 1){
    DRAW ORGANISM
 ===================================================== */
 
+function drawButterfly(head,heading){
+
+  const wingBeat =
+    0.58 +
+    Math.abs(Math.sin(time * 0.11)) * 0.42;
+
+
+  ctx.save();
+  ctx.translate(head.x,head.y);
+  ctx.rotate(heading);
+  ctx.globalCompositeOperation = "lighter";
+
+
+  /* Two broad, softly glowing wings flap on either side of the body. */
+  for(const side of [-1,1]){
+
+    ctx.save();
+    ctx.scale(1,side * wingBeat);
+    ctx.beginPath();
+    ctx.moveTo(0,0);
+    ctx.bezierCurveTo(-8,-9,-8,-31,4,-39);
+    ctx.bezierCurveTo(16,-48,33,-39,30,-26);
+    ctx.bezierCurveTo(29,-18,20,-13,12,-10);
+    ctx.bezierCurveTo(28,-16,40,-8,34,3);
+    ctx.bezierCurveTo(28,14,12,10,0,2);
+    ctx.closePath();
+
+    const wingGlow = ctx.createLinearGradient(0,-42,34,2);
+    wingGlow.addColorStop(0,colorWithAlpha(ringColor,.78));
+    wingGlow.addColorStop(.56,colorWithAlpha(trailColor,.32));
+    wingGlow.addColorStop(1,colorWithAlpha(trailColor,.08));
+    ctx.fillStyle = wingGlow;
+    ctx.fill();
+
+    ctx.strokeStyle = colorWithAlpha(ringColor,.88);
+    ctx.lineWidth = 1.15;
+    ctx.stroke();
+
+    /* Fine veins make the silhouette read as a digital butterfly. */
+    ctx.beginPath();
+    ctx.moveTo(1,0);
+    ctx.bezierCurveTo(8,-12,17,-24,27,-34);
+    ctx.moveTo(5,1);
+    ctx.bezierCurveTo(16,-3,25,-5,34,-2);
+    ctx.moveTo(3,-2);
+    ctx.bezierCurveTo(5,-13,5,-24,7,-39);
+    ctx.strokeStyle = colorWithAlpha(ringColor,.48);
+    ctx.lineWidth = .7;
+    ctx.stroke();
+
+    ctx.restore();
+
+  }
+
+
+  /* Slender glowing body, head, and antennae. */
+  ctx.lineCap = "round";
+  ctx.beginPath();
+  ctx.moveTo(-13,0);
+  ctx.lineTo(10,0);
+  ctx.strokeStyle = colorWithAlpha(ringColor,.96);
+  ctx.lineWidth = 3;
+  ctx.stroke();
+
+  ctx.beginPath();
+  ctx.arc(12,0,2.5,0,Math.PI*2);
+  ctx.fillStyle = "#f3fffc";
+  ctx.fill();
+
+  ctx.beginPath();
+  ctx.moveTo(11,-1);
+  ctx.quadraticCurveTo(17,-9,23,-10);
+  ctx.moveTo(11,1);
+  ctx.quadraticCurveTo(18,8,24,9);
+  ctx.strokeStyle = colorWithAlpha(ringColor,.72);
+  ctx.lineWidth = 1;
+  ctx.stroke();
+
+  ctx.restore();
+
+}
+
+
 function drawOrganism(){
 
   ctx.save();
@@ -1149,104 +1232,27 @@ function drawOrganism(){
     nodes[0];
 
 
-  const pulse = touching
-    ? 1
-    : 1 + Math.sin(time * 0.008) * 0.025;
+  const tail = nodes[1];
+  const heading = Math.atan2(head.y - tail.y, head.x - tail.x);
 
-
-  /*
-     HEAD GLOW
-  */
-
-  const glow =
-    ctx.createRadialGradient(
-      head.x,
-      head.y,
-      0,
-      head.x,
-      head.y,
-      95
-    );
-
-
-  glow.addColorStop(
-    0,
-    "rgba(255,255,255,.98)"
-  );
-
-
-  glow.addColorStop(
-    0.06,
-    "rgba(130,255,220,.90)"
-  );
-
-
-  glow.addColorStop(
-    0.22,
-    "rgba(52,255,195,.24)"
-  );
-
-
-  glow.addColorStop(
-    1,
-    "rgba(0,0,0,0)"
-  );
-
-
-  ctx.fillStyle =
-    glow;
-
-
-  ctx.fillRect(
-    head.x - 95,
-    head.y - 95,
-    190,
-    190
-  );
-
-
-  /*
-     HEAD
-  */
-
-  ctx.beginPath();
-
-  ctx.arc(
+  const glow = ctx.createRadialGradient(
     head.x,
     head.y,
-    16 * pulse,
     0,
-    Math.PI*2
-  );
-
-
-  ctx.fillStyle =
-    "#ecfff9";
-
-
-  ctx.fill();
-
-
-  /*
-     CORE
-  */
-
-  ctx.beginPath();
-
-  ctx.arc(
     head.x,
     head.y,
-    6,
-    0,
-    Math.PI*2
+    82
   );
 
+  glow.addColorStop(0,"rgba(255,255,255,.72)");
+  glow.addColorStop(.12,colorWithAlpha(ringColor,.46));
+  glow.addColorStop(.42,colorWithAlpha(trailColor,.16));
+  glow.addColorStop(1,"rgba(0,0,0,0)");
 
-  ctx.fillStyle =
-    "#35ffc4";
+  ctx.fillStyle = glow;
+  ctx.fillRect(head.x - 82,head.y - 82,164,164);
 
-
-  ctx.fill();
+  drawButterfly(head,heading);
 
 
   /* Fine orbit rings add motion without changing the head's size. */
