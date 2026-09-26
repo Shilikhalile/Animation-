@@ -232,9 +232,6 @@ for(let i = 0; i < NODE_COUNT; i++){
    PARTICLES
 ===================================================== */
 
-const particles = [];
-
-
 /* =====================================================
    TRAIL
 ===================================================== */
@@ -320,56 +317,6 @@ function setFinger(x,y){
 
 
 /* =====================================================
-   PARTICLE BURST
-===================================================== */
-
-function burst(x,y,count){
-
-  for(
-    let i = 0;
-    i < count;
-    i++
-  ){
-
-    const angle =
-      Math.random() *
-      Math.PI *
-      2;
-
-
-    const speed =
-      1 +
-      Math.random() * 5;
-
-
-    particles.push({
-
-      x:x,
-
-      y:y,
-
-      vx:
-        Math.cos(angle) *
-        speed,
-
-      vy:
-        Math.sin(angle) *
-        speed,
-
-      life:1,
-
-      size:
-        1 +
-        Math.random() * 3
-
-    });
-
-  }
-
-}
-
-
-/* =====================================================
    TOUCH START
 ===================================================== */
 
@@ -387,11 +334,6 @@ function startTouch(e){
   );
 
 
-  /*
-     Immediately move target
-     toward finger.
-  */
-
   target.x =
     e.clientX;
 
@@ -408,11 +350,11 @@ function startTouch(e){
     "TRACKING YOUR FINGER";
 
 
-  burst(
-    e.clientX,
-    e.clientY,
-    32
-  );
+  trail.push({
+    x:e.clientX,
+    y:e.clientY,
+    life:1
+  });
 
 
   try{
@@ -587,34 +529,11 @@ function updateTarget(delta = 1){
 
   if(touching){
 
-    /*
-       Follow finger smoothly.
-    */
-
-    target.vx +=
-      (
-        finger.x -
-        target.x
-      ) * 0.20 * delta;
-
-
-    target.vy +=
-      (
-        finger.y -
-        target.y
-      ) * 0.20 * delta;
-
-
-    target.vx *= Math.pow(0.72, delta);
-
-    target.vy *= Math.pow(0.72, delta);
-
-
-    target.x +=
-      target.vx * delta;
-
-    target.y +=
-      target.vy * delta;
+    /* Keep the head's target exactly under the finger, with no spring lag. */
+    target.x = finger.x;
+    target.y = finger.y;
+    target.vx = 0;
+    target.vy = 0;
 
   }
 
@@ -704,47 +623,13 @@ function updateTarget(delta = 1){
   }
 
 
-  /*
-     Keep target on screen.
-  */
+  /* Constrain idle movement, but never offset the head away from a held finger. */
+  if(!touching){
 
-  const margin = 40;
+    const margin = 40;
 
-
-  if(target.x < margin){
-
-    target.x = margin;
-
-    target.vx *= -0.5;
-
-  }
-
-
-  if(target.x > W-margin){
-
-    target.x =
-      W-margin;
-
-    target.vx *= -0.5;
-
-  }
-
-
-  if(target.y < margin){
-
-    target.y = margin;
-
-    target.vy *= -0.5;
-
-  }
-
-
-  if(target.y > H-margin){
-
-    target.y =
-      H-margin;
-
-    target.vy *= -0.5;
+    target.x = Math.max(margin, Math.min(W - margin, target.x));
+    target.y = Math.max(margin, Math.min(H - margin, target.y));
 
   }
 
@@ -771,6 +656,17 @@ function updateOrganism(delta = 1){
       i === 0
         ? target
         : nodes[i-1];
+
+
+    if(touching && i === 0){
+
+      node.x = target.x;
+      node.y = target.y;
+      node.vx = 0;
+      node.vy = 0;
+      continue;
+
+    }
 
 
     const follow =
@@ -869,29 +765,37 @@ function drawTrail(delta = 1){
     }
 
 
-    ctx.beginPath();
-
-    ctx.arc(
-      p.x,
-      p.y,
-      1.5 +
-      (1-p.life)*2,
-      0,
-      Math.PI*2
-    );
+  }
 
 
-    ctx.fillStyle =
-      "rgba(52,255,195," +
-      (
-        p.life * 0.20
-      ) +
-      ")";
+  if(trail.length < 2){
 
-
-    ctx.fill();
+    return;
 
   }
+
+
+  ctx.save();
+  ctx.globalCompositeOperation = "lighter";
+  ctx.lineCap = "round";
+  ctx.lineJoin = "round";
+
+  for(let i = 1; i < trail.length; i++){
+
+    const previous = trail[i-1];
+    const current = trail[i];
+    const life = Math.min(previous.life, current.life);
+
+    ctx.beginPath();
+    ctx.moveTo(previous.x, previous.y);
+    ctx.lineTo(current.x, current.y);
+    ctx.strokeStyle = `rgba(52,255,195,${life * 0.24})`;
+    ctx.lineWidth = 1 + life * 3;
+    ctx.stroke();
+
+  }
+
+  ctx.restore();
 
 }
 
@@ -1000,11 +904,9 @@ function drawOrganism(){
     nodes[0];
 
 
-  const pulse =
-    1 +
-    Math.sin(
-      time * 0.008
-    ) * 0.08;
+  const pulse = touching
+    ? 1
+    : 1 + Math.sin(time * 0.008) * 0.025;
 
 
   /*
@@ -1102,6 +1004,19 @@ function drawOrganism(){
   ctx.fill();
 
 
+  /* Fine orbit rings add motion without changing the head's size. */
+  ctx.strokeStyle = "rgba(52,255,195,.20)";
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.ellipse(head.x, head.y, 27, 10, time * 0.0015, 0, Math.PI * 2);
+  ctx.stroke();
+
+  ctx.strokeStyle = "rgba(130,255,220,.12)";
+  ctx.beginPath();
+  ctx.ellipse(head.x, head.y, 35, 13, -time * 0.001, 0, Math.PI * 2);
+  ctx.stroke();
+
+
   /*
      ORBIT PIXELS
   */
@@ -1150,82 +1065,6 @@ function drawOrganism(){
       2,
       2
     );
-
-  }
-
-
-  ctx.restore();
-
-}
-
-
-/* =====================================================
-   PARTICLES
-===================================================== */
-
-function updateParticles(delta = 1){
-
-  ctx.save();
-
-
-  ctx.globalCompositeOperation =
-    "lighter";
-
-
-  for(
-    let i = particles.length - 1;
-    i >= 0;
-    i--
-  ){
-
-    const p =
-      particles[i];
-
-
-    p.x += p.vx * delta;
-
-    p.y += p.vy * delta;
-
-
-    p.vx *= Math.pow(0.97, delta);
-
-    p.vy *= Math.pow(0.97, delta);
-
-
-    p.life -= 0.018 * delta;
-
-
-    ctx.beginPath();
-
-
-    ctx.arc(
-      p.x,
-      p.y,
-      p.size * p.life,
-      0,
-      Math.PI*2
-    );
-
-
-    ctx.fillStyle =
-      "rgba(52,255,195," +
-      (
-        p.life * 0.70
-      ) +
-      ")";
-
-
-    ctx.fill();
-
-
-    if(p.life <= 0){
-
-      particles.splice(
-        i,
-        1
-      );
-
-    }
 
   }
 
@@ -1305,7 +1144,6 @@ function animate(timestamp){
 
     drawTrail(delta);
     drawOrganism();
-    updateParticles(delta);
 
   }catch(error){
 
