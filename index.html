@@ -2,275 +2,61 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-
-<meta
-  name="viewport"
-  content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover"
->
-
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#000000">
-
 <title>Digital Organism</title>
-
 <style>
-
-*{
-  box-sizing:border-box;
-  margin:0;
-  padding:0;
-  -webkit-tap-highlight-color:transparent;
-}
-
-html,
-body{
-  width:100%;
-  height:100%;
-  overflow:hidden;
-  background:#000;
-}
-
-body{
-  touch-action:none;
-  overscroll-behavior:none;
-  user-select:none;
-  font-family:Arial,Helvetica,sans-serif;
-}
-
-canvas{
-  position:fixed;
-  inset:0;
-  width:100%;
-  height:100%;
-  display:block;
-  touch-action:none;
-}
-
-.ui{
-  position:fixed;
-  inset:0;
-  pointer-events:none;
-}
-
-.title{
-  position:absolute;
-  top:22px;
-  left:50%;
-  transform:translateX(-50%);
-
-  color:rgba(255,255,255,.42);
-  font-size:9px;
-  letter-spacing:4px;
-
-  white-space:nowrap;
-}
-
-.status{
-  position:absolute;
-  bottom:24px;
-  left:50%;
-  transform:translateX(-50%);
-
-  color:rgba(255,255,255,.30);
-  font-size:9px;
-  letter-spacing:2px;
-
-  white-space:nowrap;
-}
-
-.dot{
-  display:inline-block;
-
-  width:5px;
-  height:5px;
-
-  margin-right:7px;
-
-  border-radius:50%;
-
-  background:#35ffc4;
-
-  box-shadow:
-    0 0 8px #35ffc4,
-    0 0 18px #35ffc4;
-}
-
-.colors-toggle{
-  position:absolute;
-  top:18px;
-  right:18px;
-  display:flex;
-  align-items:center;
-  gap:8px;
-  padding:10px 12px;
-  border:1px solid rgba(130,255,220,.24);
-  border-radius:999px;
-  background:rgba(4,18,16,.78);
-  color:rgba(235,255,249,.88);
-  font-size:9px;
-  letter-spacing:1.8px;
-  cursor:pointer;
-  pointer-events:auto;
-  touch-action:manipulation;
-  backdrop-filter:blur(12px);
-  -webkit-backdrop-filter:blur(12px);
-  transition:border-color .18s ease, background .18s ease, transform .18s ease;
-}
-
-.colors-toggle:hover,
-.colors-toggle[aria-expanded="true"]{
-  border-color:rgba(130,255,220,.58);
-  background:rgba(9,30,25,.92);
-  transform:translateY(-1px);
-}
-
-.colors-toggle:focus-visible,
-.preset:focus-visible,
-.colors-panel input:focus-visible{
-  outline:2px solid rgba(130,255,220,.8);
-  outline-offset:3px;
-}
-
-.colors-icon{
-  width:10px;
-  height:10px;
-  border:1px solid rgba(255,255,255,.65);
-  border-radius:50%;
-  background:linear-gradient(135deg,#34ffc3 50%,#ae8aff 50%);
-  box-shadow:0 0 10px rgba(52,255,195,.42);
-}
-
-.colors-panel{
-  position:absolute;
-  top:62px;
-  right:18px;
-  width:232px;
-  padding:14px;
-  border:1px solid rgba(130,255,220,.2);
-  border-radius:14px;
-  background:rgba(5,13,14,.91);
-  color:rgba(239,255,250,.84);
-  box-shadow:0 14px 44px rgba(0,0,0,.42), 0 0 26px rgba(52,255,195,.07);
-  pointer-events:auto;
-  backdrop-filter:blur(16px);
-  -webkit-backdrop-filter:blur(16px);
-}
-
-.colors-panel[hidden]{
-  display:none;
-}
-
-.panel-title{
-  margin-bottom:12px;
-  color:rgba(255,255,255,.48);
-  font-size:8px;
-  letter-spacing:2px;
-}
-
-.color-row{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  min-height:38px;
-  color:rgba(239,255,250,.8);
-  font-size:11px;
-  letter-spacing:.5px;
-}
-
-.color-row input[type="color"]{
-  width:38px;
-  height:26px;
-  padding:2px;
-  border:1px solid rgba(255,255,255,.2);
-  border-radius:7px;
-  background:rgba(255,255,255,.08);
-  cursor:pointer;
-}
-
-.color-row input[type="checkbox"]{
-  width:16px;
-  height:16px;
-  accent-color:#34ffc3;
-  cursor:pointer;
-}
-
-.presets-label{
-  margin:10px 0 8px;
-  color:rgba(255,255,255,.38);
-  font-size:8px;
-  letter-spacing:1.5px;
-}
-
-.presets{
-  display:flex;
-  flex-wrap:wrap;
-  gap:6px;
-}
-
-.preset{
-  padding:7px 8px;
-  border:1px solid rgba(255,255,255,.12);
-  border-radius:999px;
-  background:rgba(255,255,255,.04);
-  color:rgba(245,255,250,.72);
-  font-size:8px;
-  letter-spacing:.7px;
-  cursor:pointer;
-  touch-action:manipulation;
-}
-
-.preset:hover{
-  border-color:rgba(130,255,220,.45);
-  color:#fff;
-}
-
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html,body{width:100%;height:100%;overflow:hidden;background:#000;}
+body{touch-action:none;overscroll-behavior:none;user-select:none;font-family:Arial,Helvetica,sans-serif;}
+canvas{position:fixed;inset:0;width:100%;height:100%;display:block;touch-action:none;}
+.ui{position:fixed;inset:0;pointer-events:none;}
+.title{position:absolute;top:22px;left:50%;transform:translateX(-50%);color:rgba(255,255,255,.42);font-size:9px;letter-spacing:4px;white-space:nowrap;}
+.status{position:absolute;bottom:24px;left:50%;transform:translateX(-50%);color:rgba(255,255,255,.30);font-size:9px;letter-spacing:2px;white-space:nowrap;}
+.dot{display:inline-block;width:5px;height:5px;margin-right:7px;border-radius:50%;background:#35ffc4;box-shadow:0 0 8px #35ffc4,0 0 18px #35ffc4;}
+.colors-toggle{position:absolute;top:18px;right:18px;display:flex;align-items:center;gap:8px;padding:10px 12px;border:1px solid rgba(130,255,220,.24);border-radius:999px;background:rgba(4,18,16,.78);color:rgba(235,255,249,.88);font-size:9px;letter-spacing:1.8px;cursor:pointer;pointer-events:auto;touch-action:manipulation;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);transition:border-color .18s ease,background .18s ease,transform .18s ease;}
+.colors-toggle:hover,.colors-toggle[aria-expanded="true"]{border-color:rgba(130,255,220,.58);background:rgba(9,30,25,.92);transform:translateY(-1px);}
+.colors-toggle:focus-visible,.preset:focus-visible,.colors-panel input:focus-visible{outline:2px solid rgba(130,255,220,.8);outline-offset:3px;}
+.colors-icon{width:10px;height:10px;border:1px solid rgba(255,255,255,.65);border-radius:50%;background:linear-gradient(135deg,#34ffc3 50%,#ae8aff 50%);box-shadow:0 0 10px rgba(52,255,195,.42);}
+.colors-panel{position:absolute;top:62px;right:18px;width:232px;padding:14px;border:1px solid rgba(130,255,220,.2);border-radius:14px;background:rgba(5,13,14,.91);color:rgba(239,255,250,.84);box-shadow:0 14px 44px rgba(0,0,0,.42),0 0 26px rgba(52,255,195,.07);pointer-events:auto;backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);}
+.colors-panel[hidden]{display:none;}
+.panel-title{margin-bottom:12px;color:rgba(255,255,255,.48);font-size:8px;letter-spacing:2px;}
+.color-row{display:flex;align-items:center;justify-content:space-between;min-height:38px;color:rgba(239,255,250,.8);font-size:11px;letter-spacing:.5px;}
+.color-row input[type="color"]{width:38px;height:26px;padding:2px;border:1px solid rgba(255,255,255,.2);border-radius:7px;background:rgba(255,255,255,.08);cursor:pointer;}
+.color-row input[type="checkbox"]{width:16px;height:16px;accent-color:#34ffc3;cursor:pointer;}
+.presets-label{margin:10px 0 8px;color:rgba(255,255,255,.38);font-size:8px;letter-spacing:1.5px;}
+.presets{display:flex;flex-wrap:wrap;gap:6px;}
+.preset{padding:7px 8px;border:1px solid rgba(255,255,255,.12);border-radius:999px;background:rgba(255,255,255,.04);color:rgba(245,255,250,.72);font-size:8px;letter-spacing:.7px;cursor:pointer;touch-action:manipulation;}
+.preset:hover{border-color:rgba(130,255,220,.45);color:#fff;}
 @media(max-width:480px){
   .title{left:14px;transform:none;letter-spacing:2.5px;}
   .colors-toggle{top:12px;right:12px;padding:9px 10px;}
   .colors-panel{top:56px;right:12px;width:min(232px,calc(100vw - 24px));}
 }
-
 </style>
 </head>
-
 <body>
-
 <canvas id="canvas"></canvas>
-
 <div class="ui">
-
-  <div class="title">
-    DIGITAL ORGANISM
-  </div>
-
-  <button
-    id="colorsToggle"
-    class="colors-toggle"
-    type="button"
-    aria-expanded="false"
-    aria-controls="colorsPanel"
-  >
+  <div class="title">DIGITAL ORGANISM</div>
+  <button id="colorsToggle" class="colors-toggle" type="button" aria-expanded="false" aria-controls="colorsPanel">
     <span class="colors-icon" aria-hidden="true"></span>
     <span>COLORS</span>
   </button>
-
   <section id="colorsPanel" class="colors-panel" aria-label="Light effect colors" hidden>
     <div class="panel-title">LIVE LIGHT COLORS</div>
-
     <label class="color-row" for="trailColor">
       <span>Finger trail</span>
       <input id="trailColor" type="color" value="#34ffc3">
     </label>
-
     <label class="color-row" for="ringColor">
       <span>Orbit rings</span>
       <input id="ringColor" type="color" value="#34ffc3">
     </label>
-
     <label class="color-row" for="touchSound">
       <span>Touch chime</span>
       <input id="touchSound" type="checkbox" checked>
     </label>
-
     <div class="presets-label">QUICK PALETTES</div>
     <div class="presets">
       <button class="preset" type="button" data-trail="#34ffc3" data-rings="#82ffdc">JADE</button>
@@ -279,204 +65,105 @@ canvas{
       <button class="preset" type="button" data-trail="#4bdcff" data-rings="#a4f2ff">ICE</button>
     </div>
   </section>
-
   <div class="status">
     <span class="dot"></span>
-    <span id="status">
-      TOUCH TO CONTROL
-    </span>
+    <span id="status">TOUCH TO CONTROL</span>
   </div>
-
 </div>
-
-
 <script>
-
 (() => {
-
 "use strict";
 
-
 /* =====================================================
-   CANVAS
+   DOM
 ===================================================== */
+const canvas = document.getElementById("canvas");
+const ctx = canvas.getContext("2d", { alpha: false });
 
-const canvas =
-  document.getElementById("canvas");
-
-const ctx =
-  canvas.getContext("2d", {
-    alpha:false
-  });
-
-const status =
-  document.getElementById("status");
-
-const colorsToggle =
-  document.getElementById("colorsToggle");
-
-const colorsPanel =
-  document.getElementById("colorsPanel");
-
-const trailColorInput =
-  document.getElementById("trailColor");
-
-const ringColorInput =
-  document.getElementById("ringColor");
-
-const touchSoundToggle =
-  document.getElementById("touchSound");
+const status = document.getElementById("status");
+const colorsToggle = document.getElementById("colorsToggle");
+const colorsPanel = document.getElementById("colorsPanel");
+const trailColorInput = document.getElementById("trailColor");
+const ringColorInput = document.getElementById("ringColor");
+const touchSoundToggle = document.getElementById("touchSound");
 
 let trailColor = trailColorInput.value;
-
 let ringColor = ringColorInput.value;
-
 let touchSoundEnabled = touchSoundToggle.checked;
-
 let audioContext = null;
 
-
-function colorWithAlpha(hex,alpha){
-
-  const value = hex.replace("#", "");
-
-  const red = parseInt(value.slice(0,2),16);
-  const green = parseInt(value.slice(2,4),16);
-  const blue = parseInt(value.slice(4,6),16);
-
-  return `rgba(${red},${green},${blue},${alpha})`;
-
+function colorWithAlpha(hex, alpha){
+  const v = hex.replace("#","");
+  const r = parseInt(v.slice(0,2),16);
+  const g = parseInt(v.slice(2,4),16);
+  const b = parseInt(v.slice(4,6),16);
+  return `rgba(${r},${g},${b},${alpha})`;
 }
 
-
+/* =====================================================
+   AUDIO
+===================================================== */
 function playTouchChime(){
-
-  if(!touchSoundEnabled){
-
-    return;
-
-  }
-
-
-  const AudioContextClass =
-    window.AudioContext ||
-    window.webkitAudioContext;
-
-
-  if(!AudioContextClass){
-
-    return;
-
-  }
-
-
+  if(!touchSoundEnabled) return;
+  const AC = window.AudioContext || window.webkitAudioContext;
+  if(!AC) return;
   try{
-
-    if(!audioContext){
-
-      audioContext = new AudioContextClass();
-
-    }
-
-
-    if(audioContext.state === "suspended"){
-
-      audioContext.resume();
-
-    }
-
+    if(!audioContext) audioContext = new AC();
+    if(audioContext.state === "suspended") audioContext.resume();
 
     const now = audioContext.currentTime;
-    const oscillator = audioContext.createOscillator();
-    const volume = audioContext.createGain();
+    const osc = audioContext.createOscillator();
+    const gain = audioContext.createGain();
 
-    oscillator.type = "sine";
-    oscillator.frequency.setValueAtTime(740,now);
-    oscillator.frequency.exponentialRampToValueAtTime(1180,now + .11);
+    osc.type = "sine";
+    osc.frequency.setValueAtTime(740, now);
+    osc.frequency.exponentialRampToValueAtTime(1180, now + .11);
 
-    volume.gain.setValueAtTime(.0001,now);
-    volume.gain.exponentialRampToValueAtTime(.045,now + .012);
-    volume.gain.exponentialRampToValueAtTime(.0001,now + .24);
+    gain.gain.setValueAtTime(.0001, now);
+    gain.gain.exponentialRampToValueAtTime(.045, now + .012);
+    gain.gain.exponentialRampToValueAtTime(.0001, now + .24);
 
-    oscillator.connect(volume);
-    volume.connect(audioContext.destination);
-    oscillator.start(now);
-    oscillator.stop(now + .25);
-
-  }catch(error){
-
-    console.warn("Touch chime is unavailable in this browser.");
-
-  }
-
+    osc.connect(gain);
+    gain.connect(audioContext.destination);
+    osc.start(now);
+    osc.stop(now + .25);
+  }catch(e){ console.warn("Chime unavailable", e); }
 }
 
-
+/* =====================================================
+   UI CONTROLS
+===================================================== */
 function setColorsPanelOpen(open){
-
   colorsPanel.hidden = !open;
   colorsToggle.setAttribute("aria-expanded", String(open));
-
 }
 
-
-colorsToggle.addEventListener("click", () => {
-
-  setColorsPanelOpen(colorsPanel.hidden);
-
-});
-
-
-trailColorInput.addEventListener("input", () => {
-
-  trailColor = trailColorInput.value;
-
-});
-
-
-ringColorInput.addEventListener("input", () => {
-
-  ringColor = ringColorInput.value;
-
-});
-
-
-touchSoundToggle.addEventListener("change", () => {
-
-  touchSoundEnabled = touchSoundToggle.checked;
-
-});
-
+colorsToggle.addEventListener("click", () => setColorsPanelOpen(colorsPanel.hidden));
+trailColorInput.addEventListener("input", () => trailColor = trailColorInput.value);
+ringColorInput.addEventListener("input", () => ringColor = ringColorInput.value);
+touchSoundToggle.addEventListener("change", () => touchSoundEnabled = touchSoundToggle.checked);
 
 for(const preset of colorsPanel.querySelectorAll(".preset")){
-
   preset.addEventListener("click", () => {
-
     trailColor = preset.dataset.trail;
     ringColor = preset.dataset.rings;
     trailColorInput.value = trailColor;
     ringColorInput.value = ringColor;
-
   });
-
 }
 
-
 window.addEventListener("keydown", (event) => {
-
   if(event.key === "Escape" && !colorsPanel.hidden){
-
     setColorsPanelOpen(false);
     colorsToggle.focus();
-
   }
-
 });
 
-
+/* =====================================================
+   CANVAS / STATE
+===================================================== */
 let W = window.innerWidth;
 let H = window.innerHeight;
-
 let DPR = 1;
 
 let time = 0;
@@ -484,388 +171,127 @@ let animationRunning = false;
 let animationFrameId = null;
 let lastFrameTimestamp = null;
 
-
-/* =====================================================
-   POINTER
-===================================================== */
-
 let touching = false;
-
 let pointerId = null;
 
-
-/*
-   Position of finger
-*/
-
-const finger = {
-
-  x: W / 2,
-
-  y: H / 2
-
-};
-
-
-/*
-   Moving target.
-
-   Important:
-   This target continues moving
-   even after finger leaves.
-*/
-
-const target = {
-
-  x: W / 2,
-
-  y: H / 2,
-
-  vx: 0,
-
-  vy: 0
-
-};
-
+const finger = { x: W/2, y: H/2 };
+const target = { x: W/2, y: H/2, vx: 0, vy: 0 };
 
 /* =====================================================
-   ORGANISM
+   ORGANISM NODES
 ===================================================== */
-
 const nodes = [];
-
 const NODE_COUNT = 38;
 
-
 for(let i = 0; i < NODE_COUNT; i++){
-
-  /* Start as a softly curved body instead of a single stacked point. */
-  const initialX = W / 2 - i * 5;
-  const initialY = H / 2 + Math.sin(i * 0.24) * 12;
-
+  const initialX = W/2 - i * 5;
+  const initialY = H/2 + Math.sin(i * 0.24) * 12;
   nodes.push({
-
-    x: initialX,
-
-    y: initialY,
-
-    vx: 0,
-
-    vy: 0,
-
-    size:
-      15 -
-      i * 0.27
-
+    x: initialX, y: initialY,
+    vx: 0, vy: 0,
+    size: 15 - i * 0.27
   });
-
 }
 
-
-/* =====================================================
-   TOUCH RIPPLE
-===================================================== */
-
-/* =====================================================
-   TRAIL
-===================================================== */
-
 const trail = [];
-
 const touchRipples = [];
-
+const sparks = [];
 
 /* =====================================================
    RESIZE
 ===================================================== */
-
 function resize(){
+  DPR = Math.min(window.devicePixelRatio || 1, 2);
+  W = window.innerWidth;
+  H = window.innerHeight;
 
-  DPR =
-    Math.min(
-      window.devicePixelRatio || 1,
-      2
-    );
+  canvas.width  = Math.floor(W * DPR);
+  canvas.height = Math.floor(H * DPR);
+  canvas.style.width  = W + "px";
+  canvas.style.height = H + "px";
 
+  ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
 
-  W =
-    window.innerWidth;
-
-  H =
-    window.innerHeight;
-
-
-  canvas.width =
-    Math.floor(W * DPR);
-
-  canvas.height =
-    Math.floor(H * DPR);
-
-
-  canvas.style.width =
-    W + "px";
-
-  canvas.style.height =
-    H + "px";
-
-
-  ctx.setTransform(
-    DPR,
-    0,
-    0,
-    DPR,
-    0,
-    0
-  );
-
-
-  if(!touching){
-
-    target.x =
-      W / 2;
-
-    target.y =
-      H / 2;
-
-  }
-
+  if(!touching){ target.x = W/2; target.y = H/2; }
 }
-
-window.addEventListener(
-  "resize",
-  resize
-);
-
+window.addEventListener("resize", resize);
 resize();
 
-
 /* =====================================================
-   SET FINGER
+   POINTER
 ===================================================== */
-
-function setFinger(x,y){
-
-  finger.x = x;
-
-  finger.y = y;
-
-}
-
-
-/* =====================================================
-   TOUCH START
-===================================================== */
+function setFinger(x,y){ finger.x = x; finger.y = y; }
 
 function startTouch(e){
-
   touching = true;
+  pointerId = e.pointerId;
 
-  pointerId =
-    e.pointerId;
-
-
-  setFinger(
-    e.clientX,
-    e.clientY
-  );
-
-
-  target.x =
-    e.clientX;
-
-  target.y =
-    e.clientY;
-
-
+  setFinger(e.clientX, e.clientY);
+  target.x = e.clientX;
+  target.y = e.clientY;
   target.vx = 0;
-
   target.vy = 0;
 
-
-  status.textContent =
-    "TRACKING YOUR FINGER";
-
-
+  status.textContent = "TRACKING YOUR FINGER";
   playTouchChime();
 
+  touchRipples.push({ x:e.clientX, y:e.clientY, radius:8, life:1 });
+  if(touchRipples.length > 5) touchRipples.shift();
 
-  touchRipples.push({
-    x:e.clientX,
-    y:e.clientY,
-    radius:8,
-    life:1
-  });
-
-  if(touchRipples.length > 5){
-
-    touchRipples.shift();
-
+  for(let i = 0; i < 8; i++){
+    const angle = Math.random() * Math.PI * 2;
+    const speed = 1 + Math.random() * 3;
+    sparks.push({
+      x: e.clientX, y: e.clientY,
+      vx: Math.cos(angle) * speed,
+      vy: Math.sin(angle) * speed,
+      life: 1
+    });
   }
+  if(sparks.length > 120) sparks.splice(0, sparks.length - 120);
 
+  trail.push({ x:e.clientX, y:e.clientY, life:1 });
 
-  trail.push({
-    x:e.clientX,
-    y:e.clientY,
-    life:1
-  });
-
-
-  try{
-
-    canvas.setPointerCapture(
-      e.pointerId
-    );
-
-  }catch(error){}
-
+  try{ canvas.setPointerCapture(e.pointerId); }catch(_){}
 }
-
-
-/* =====================================================
-   TOUCH MOVE
-===================================================== */
 
 function moveTouch(e){
+  if(pointerId !== null && e.pointerId !== pointerId) return;
+  if(!touching) return;
 
-  if(
-    pointerId !== null &&
-    e.pointerId !== pointerId
-  ){
-
-    return;
-
-  }
-
-
-  if(!touching){
-
-    return;
-
-  }
-
-
-  setFinger(
-    e.clientX,
-    e.clientY
-  );
-
-
-  /*
-     Save finger trail.
-  */
-
-  trail.push({
-
-    x:e.clientX,
-
-    y:e.clientY,
-
-    life:1
-
-  });
-
-
-  if(trail.length > 100){
-
-    trail.shift();
-
-  }
-
+  setFinger(e.clientX, e.clientY);
+  trail.push({ x:e.clientX, y:e.clientY, life:1 });
+  if(trail.length > 100) trail.shift();
 }
-
-
-/* =====================================================
-   TOUCH END
-===================================================== */
 
 function releaseTouch(){
-
-  if(!touching){
-
-    return;
-
-  }
-
-
+  if(!touching) return;
   touching = false;
-
   pointerId = null;
-
-
-  status.textContent =
-    "FREE MOVEMENT";
-
-
-  /* The organism keeps moving on its own after release. */
-
+  status.textContent = "FREE MOVEMENT";
 }
-
 
 function endTouch(e){
-
-  if(
-    e &&
-    pointerId !== null &&
-    e.pointerId !== pointerId
-  ){
-
-    return;
-
-  }
-
-
+  if(e && pointerId !== null && e.pointerId !== pointerId) return;
   releaseTouch();
-
 }
 
+canvas.addEventListener("pointerdown", startTouch, { passive:false });
+canvas.addEventListener("pointermove", moveTouch, { passive:false });
+canvas.addEventListener("pointerup", endTouch, { passive:false });
+canvas.addEventListener("pointercancel", endTouch, { passive:false });
 
-/* =====================================================
-   EVENTS
-===================================================== */
-
-canvas.addEventListener(
-  "pointerdown",
-  startTouch,
-  {passive:false}
-);
-
-
-canvas.addEventListener(
-  "pointermove",
-  moveTouch,
-  {passive:false}
-);
-
-
-canvas.addEventListener(
-  "pointerup",
-  endTouch,
-  {passive:false}
-);
-
-
-canvas.addEventListener(
-  "pointercancel",
-  endTouch,
-  {passive:false}
-);
-
-
-/* Release pointer control when the page loses focus or is backgrounded. */
 window.addEventListener("blur", releaseTouch);
 document.addEventListener("visibilitychange", () => {
-  if(document.hidden){
-    releaseTouch();
-    stopAnimation();
-  }else{
-    startAnimation();
-  }
+  if(document.hidden){ releaseTouch(); stopAnimation(); }
+  else { startAnimation(); }
 });
 window.addEventListener("pageshow", startAnimation);
 window.addEventListener("pagehide", stopAnimation);
-
-
-/* Recover the render loop if the browser recreates the canvas context. */
+  
+/* =====================================================
+   CONTEXT LOST / RESTORED
+===================================================== */
 canvas.addEventListener("contextlost", (event) => {
   event.preventDefault();
   stopAnimation();
@@ -873,295 +299,104 @@ canvas.addEventListener("contextlost", (event) => {
 });
 canvas.addEventListener("contextrestored", startAnimation);
 
-
 /* =====================================================
    UPDATE TARGET
 ===================================================== */
-
 function updateTarget(delta = 1){
-
   if(touching){
-
-    /* Keep the head's target exactly under the finger, with no spring lag. */
     target.x = finger.x;
     target.y = finger.y;
     target.vx = 0;
     target.vy = 0;
+  } else {
+    const radius = Math.min(W,H) * 0.23;
+    const centerX = W/2;
+    const centerY = H/2;
 
-  }
+    const freeX = centerX + Math.cos(time * 0.004) * radius + Math.sin(time * 0.009) * radius * 0.35;
+    const freeY = centerY + Math.sin(time * 0.005) * radius + Math.cos(time * 0.007) * radius * 0.30;
 
-  else{
-
-    /*
-       FREE MOVEMENT
-
-       The target continuously travels
-       around the screen.
-    */
-
-
-    const radius =
-      Math.min(W,H) * 0.23;
-
-
-    const centerX =
-      W / 2;
-
-    const centerY =
-      H / 2;
-
-
-    /*
-       Multiple sine waves make
-       the movement feel alive.
-    */
-
-    const freeX =
-      centerX +
-
-      Math.cos(
-        time * 0.004
-      ) *
-
-      radius +
-
-      Math.sin(
-        time * 0.009
-      ) *
-
-      radius * 0.35;
-
-
-    const freeY =
-      centerY +
-
-      Math.sin(
-        time * 0.005
-      ) *
-
-      radius +
-
-      Math.cos(
-        time * 0.007
-      ) *
-
-      radius * 0.30;
-
-
-    target.vx +=
-      (
-        freeX -
-        target.x
-      ) * 0.018 * delta;
-
-
-    target.vy +=
-      (
-        freeY -
-        target.y
-      ) * 0.018 * delta;
-
-
+    target.vx += (freeX - target.x) * 0.018 * delta;
+    target.vy += (freeY - target.y) * 0.018 * delta;
     target.vx *= Math.pow(0.94, delta);
-
     target.vy *= Math.pow(0.94, delta);
 
-
-    target.x +=
-      target.vx * delta;
-
-    target.y +=
-      target.vy * delta;
-
-  }
-
-
-  /* Constrain idle movement, but never offset the head away from a held finger. */
-  if(!touching){
+    target.x += target.vx * delta;
+    target.y += target.vy * delta;
 
     const margin = 40;
-
     target.x = Math.max(margin, Math.min(W - margin, target.x));
     target.y = Math.max(margin, Math.min(H - margin, target.y));
-
   }
-
 }
-
 
 /* =====================================================
    UPDATE ORGANISM
 ===================================================== */
-
 function updateOrganism(delta = 1){
-
-  for(
-    let i = 0;
-    i < NODE_COUNT;
-    i++
-  ){
-
-    const node =
-      nodes[i];
-
-
-    const previous =
-      i === 0
-        ? target
-        : nodes[i-1];
-
+  for(let i = 0; i < NODE_COUNT; i++){
+    const node = nodes[i];
+    const previous = i === 0 ? target : nodes[i-1];
 
     if(touching && i === 0){
-
       node.x = target.x;
       node.y = target.y;
       node.vx = 0;
       node.vy = 0;
       continue;
-
     }
 
+    const follow = i === 0 ? 0.12 : 0.18;
 
-    const follow =
-      i === 0
-        ? 0.12
-        : 0.18;
-
-
-    node.vx +=
-      (
-        previous.x -
-        node.x
-      ) * follow * delta;
-
-
-    node.vy +=
-      (
-        previous.y -
-        node.y
-      ) * follow * delta;
-
+    node.vx += (previous.x - node.x) * follow * delta;
+    node.vy += (previous.y - node.y) * follow * delta;
 
     node.vx *= Math.pow(0.72, delta);
-
     node.vy *= Math.pow(0.72, delta);
 
+    node.x += node.vx * delta;
+    node.y += node.vy * delta;
 
-    node.x +=
-      node.vx * delta;
-
-    node.y +=
-      node.vy * delta;
-
-
-    /*
-       Body wave.
-    */
-
-    const wave =
-      Math.sin(
-        time * 0.006 +
-        i * 0.60
-      );
-
-
-    node.x +=
-      Math.cos(
-        time * 0.004 +
-        i
-      ) *
-      wave *
-      0.16 * delta;
-
-
-    node.y +=
-      Math.sin(
-        time * 0.005 +
-        i
-      ) *
-      wave *
-      0.16 * delta;
-
+    const wave = Math.sin(time * 0.006 + i * 0.60);
+    node.x += Math.cos(time * 0.004 + i) * wave * 0.16 * delta;
+    node.y += Math.sin(time * 0.005 + i) * wave * 0.16 * delta;
   }
-
 }
 
-
 /* =====================================================
-   DRAW TOUCH RIPPLE
+   DRAW RIPPLE
 ===================================================== */
-
 function drawTouchRipples(delta = 1){
-
   ctx.save();
   ctx.globalCompositeOperation = "lighter";
 
   for(let i = touchRipples.length - 1; i >= 0; i--){
+    const r = touchRipples[i];
+    r.radius += 2.2 * delta;
+    r.life -= 0.035 * delta;
 
-    const ripple = touchRipples[i];
-    ripple.radius += 2.2 * delta;
-    ripple.life -= .035 * delta;
-
-    if(ripple.life <= 0){
-
-      touchRipples.splice(i,1);
-      continue;
-
-    }
+    if(r.life <= 0){ touchRipples.splice(i,1); continue; }
 
     ctx.beginPath();
-    ctx.arc(ripple.x,ripple.y,ripple.radius,0,Math.PI*2);
-    ctx.strokeStyle = colorWithAlpha(ringColor,ripple.life * .58);
-    ctx.lineWidth = 1 + ripple.life * 1.5;
+    ctx.arc(r.x, r.y, r.radius, 0, Math.PI * 2);
+    ctx.strokeStyle = colorWithAlpha(ringColor, r.life * .58);
+    ctx.lineWidth = 1 + r.life * 1.5;
     ctx.stroke();
-
   }
-
   ctx.restore();
-
 }
-
 
 /* =====================================================
    DRAW TRAIL
 ===================================================== */
-
 function drawTrail(delta = 1){
-
-  for(
-    let i = trail.length - 1;
-    i >= 0;
-    i--
-  ){
-
-    const p =
-      trail[i];
-
-
+  for(let i = trail.length - 1; i >= 0; i--){
+    const p = trail[i];
     p.life -= 0.025 * delta;
-
-
-    if(p.life <= 0){
-
-      trail.splice(
-        i,
-        1
-      );
-
-      continue;
-
-    }
-
-
+    if(p.life <= 0){ trail.splice(i,1); continue; }
   }
 
-
-  if(trail.length < 2){
-
-    return;
-
-  }
-
+  if(trail.length < 2) return;
 
   ctx.save();
   ctx.globalCompositeOperation = "lighter";
@@ -1169,430 +404,247 @@ function drawTrail(delta = 1){
   ctx.lineJoin = "round";
 
   for(let i = 1; i < trail.length; i++){
-
-    const previous = trail[i-1];
-    const current = trail[i];
-    const life = Math.min(previous.life, current.life);
+    const prev = trail[i-1];
+    const cur = trail[i];
+    const life = Math.min(prev.life, cur.life);
 
     ctx.beginPath();
-    ctx.moveTo(previous.x, previous.y);
-    ctx.lineTo(current.x, current.y);
+    ctx.moveTo(prev.x, prev.y);
+    ctx.lineTo(cur.x, cur.y);
     ctx.strokeStyle = colorWithAlpha(trailColor, life * 0.24);
     ctx.lineWidth = 1 + life * 3;
     ctx.stroke();
-
   }
-
   ctx.restore();
-
 }
 
+/* =====================================================
+   DRAW SPARKS
+===================================================== */
+function drawSparks(delta = 1){
+  ctx.save();
+  ctx.globalCompositeOperation = "lighter";
+
+  for(let i = sparks.length - 1; i >= 0; i--){
+    const s = sparks[i];
+    s.x += s.vx * delta;
+    s.y += s.vy * delta;
+    s.vx *= Math.pow(0.94, delta);
+    s.vy *= Math.pow(0.94, delta);
+    s.life -= 0.025 * delta;
+
+    if(s.life <= 0){ sparks.splice(i,1); continue; }
+
+    ctx.beginPath();
+    ctx.arc(s.x, s.y, s.life * 2.2, 0, Math.PI * 2);
+    ctx.fillStyle = colorWithAlpha(trailColor, s.life * 0.9);
+    ctx.fill();
+  }
+  ctx.restore();
+}
+
+/* =====================================================
+   DRAW BUTTERFLY
+===================================================== */
+function drawButterfly(head, heading, index){
+  const wingSpeed = touching ? .30 : .11;
+  const wingBase  = touching ? .48 : .58;
+  const wingRange = touching ? .50 : .42;
+  const wingBeat  = wingBase + Math.abs(Math.sin(time * wingSpeed + index * 0.05)) * wingRange;
+
+  ctx.save();
+  ctx.translate(head.x, head.y);
+  ctx.rotate(heading);
+  ctx.globalCompositeOperation = "lighter";
+
+  const aura = ctx.createRadialGradient(0, 0, 0, 0, 0, 70);
+  aura.addColorStop(0, colorWithAlpha(ringColor, .22));
+  aura.addColorStop(.5, colorWithAlpha(ringColor, .06));
+  aura.addColorStop(1, colorWithAlpha(ringColor, 0));
+  ctx.fillStyle = aura;
+  ctx.beginPath();
+  ctx.arc(0, 0, 70, 0, Math.PI * 2);
+  ctx.fill();
+
+  for(const side of [-1, 1]){
+    ctx.save();
+    ctx.scale(1, side * wingBeat);
+
+    ctx.beginPath();
+    ctx.moveTo(0, 0);
+    ctx.bezierCurveTo(-8, -9, -8, -31, 4, -39);
+    ctx.bezierCurveTo(16, -48, 33, -39, 30, -26);
+    ctx.bezierCurveTo(29, -18, 20, -13, 12, -10);
+    ctx.bezierCurveTo(28, -16, 40, -8, 34, 3);
+    ctx.bezierCurveTo(28, 14, 12, 10, 0, 2);
+    ctx.closePath();
+
+    const wingGlow = ctx.createLinearGradient(0, -42, 34, 2);
+    wingGlow.addColorStop(0, colorWithAlpha(ringColor, .78));
+    wingGlow.addColorStop(.56, colorWithAlpha(trailColor, .32));
+    wingGlow.addColorStop(1, colorWithAlpha(trailColor, .08));
+    ctx.fillStyle = wingGlow;
+    ctx.fill();
+
+    ctx.strokeStyle = colorWithAlpha(ringColor, .88);
+    ctx.lineWidth = 1.15;
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.moveTo(1, 0);
+    ctx.bezierCurveTo(8, -12, 17, -24, 27, -34);
+    ctx.moveTo(5, 1);
+    ctx.bezierCurveTo(16, -3, 25, -5, 34, -2);
+    ctx.moveTo(3, -2);
+    ctx.bezierCurveTo(5, -13, 5, -24, 7, -39);
+    ctx.strokeStyle = colorWithAlpha(ringColor, .48);
+    ctx.lineWidth = 0.7;
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.arc(18, -30, 1.6, 0, Math.PI * 2);
+    ctx.arc(24, -18, 1.2, 0, Math.PI * 2);
+    ctx.fillStyle = colorWithAlpha("#ffffff", .55);
+    ctx.fill();
+
+    ctx.restore();
+  }
+
+  const bodyGrad = ctx.createLinearGradient(-6, 0, 6, 0);
+  bodyGrad.addColorStop(0, colorWithAlpha(trailColor, .9));
+  bodyGrad.addColorStop(.5, colorWithAlpha("#ffffff", .95));
+  bodyGrad.addColorStop(1, colorWithAlpha(trailColor, .9));
+
+  ctx.beginPath();
+  ctx.ellipse(0, 0, 6, 9, 0, 0, Math.PI * 2);
+  ctx.fillStyle = bodyGrad;
+  ctx.fill();
+
+  ctx.beginPath();
+  ctx.arc(3, -5, 1.6, 0, Math.PI * 2);
+  ctx.arc(-3, -5, 1.6, 0, Math.PI * 2);
+  ctx.fillStyle = "#ffffff";
+  ctx.shadowColor = ringColor;
+  ctx.shadowBlur = 8;
+  ctx.fill();
+  ctx.shadowBlur = 0;
+
+  const t = time * 0.008;
+  ctx.beginPath();
+  ctx.moveTo(2, -9);
+  ctx.quadraticCurveTo(6 + Math.sin(t) * 2, -18, 4 + Math.sin(t) * 3, -26);
+  ctx.moveTo(-2, -9);
+  ctx.quadraticCurveTo(-6 + Math.sin(t + 1) * 2, -18, -4 + Math.sin(t + 1) * 3, -26);
+  ctx.strokeStyle = colorWithAlpha(ringColor, .7);
+  ctx.lineWidth = 0.9;
+  ctx.stroke();
+
+  ctx.beginPath();
+  ctx.arc(4 + Math.sin(t) * 3, -26, 1.8, 0, Math.PI * 2);
+  ctx.arc(-4 + Math.sin(t + 1) * 3, -26, 1.8, 0, Math.PI * 2);
+  ctx.fillStyle = colorWithAlpha("#ffffff", .9);
+  ctx.shadowColor = ringColor;
+  ctx.shadowBlur = 10;
+  ctx.fill();
+  ctx.shadowBlur = 0;
+
+  ctx.restore();
+}
 
 /* =====================================================
    DRAW ORGANISM
 ===================================================== */
-
-function drawButterfly(head,heading){
-
-  const wingSpeed = touching ? .30 : .11;
-  const wingBase = touching ? .48 : .58;
-  const wingRange = touching ? .50 : .42;
-  const wingBeat = wingBase + Math.abs(Math.sin(time * wingSpeed)) * wingRange;
-
+function drawOrganism(){
+  const head = nodes[0];
+  const next = nodes[1] || head;
+  const heading = Math.atan2(head.y - next.y, head.x - next.x);
 
   ctx.save();
-  ctx.translate(head.x,head.y);
-  ctx.rotate(heading);
   ctx.globalCompositeOperation = "lighter";
 
+  for(let i = nodes.length - 1; i >= 1; i--){
+    const node = nodes[i];
+    const progress = i / nodes.length;
+    const size = Math.max(0.5, node.size * (1 - progress * 0.7));
+    const alpha = (1 - progress) * 0.55 + 0.05;
 
-  /* Two broad, softly glowing wings flap on either side of the body. */
-  for(const side of [-1,1]){
+    const glow = ctx.createRadialGradient(node.x, node.y, 0, node.x, node.y, size * 3);
+    glow.addColorStop(0, colorWithAlpha(ringColor, alpha * 0.6));
+    glow.addColorStop(1, colorWithAlpha(ringColor, 0));
 
-    ctx.save();
-    ctx.scale(1,side * wingBeat);
+    ctx.fillStyle = glow;
     ctx.beginPath();
-    ctx.moveTo(0,0);
-    ctx.bezierCurveTo(-8,-9,-8,-31,4,-39);
-    ctx.bezierCurveTo(16,-48,33,-39,30,-26);
-    ctx.bezierCurveTo(29,-18,20,-13,12,-10);
-    ctx.bezierCurveTo(28,-16,40,-8,34,3);
-    ctx.bezierCurveTo(28,14,12,10,0,2);
-    ctx.closePath();
-
-    const wingGlow = ctx.createLinearGradient(0,-42,34,2);
-    wingGlow.addColorStop(0,colorWithAlpha(ringColor,.78));
-    wingGlow.addColorStop(.56,colorWithAlpha(trailColor,.32));
-    wingGlow.addColorStop(1,colorWithAlpha(trailColor,.08));
-    ctx.fillStyle = wingGlow;
+    ctx.arc(node.x, node.y, size * 3, 0, Math.PI * 2);
     ctx.fill();
 
-    ctx.strokeStyle = colorWithAlpha(ringColor,.88);
-    ctx.lineWidth = 1.15;
-    ctx.stroke();
-
-    /* Fine veins make the silhouette read as a digital butterfly. */
     ctx.beginPath();
-    ctx.moveTo(1,0);
-    ctx.bezierCurveTo(8,-12,17,-24,27,-34);
-    ctx.moveTo(5,1);
-    ctx.bezierCurveTo(16,-3,25,-5,34,-2);
-    ctx.moveTo(3,-2);
-    ctx.bezierCurveTo(5,-13,5,-24,7,-39);
-    ctx.strokeStyle = colorWithAlpha(ringColor,.48);
-    ctx.lineWidth = .7;
-    ctx.stroke();
-
-    ctx.restore();
-
+    ctx.arc(node.x, node.y, size, 0, Math.PI * 2);
+    ctx.fillStyle = colorWithAlpha(trailColor, alpha);
+    ctx.fill();
   }
-
-
-  /* Slender glowing body, head, and antennae. */
-  ctx.lineCap = "round";
-  ctx.beginPath();
-  ctx.moveTo(-13,0);
-  ctx.lineTo(10,0);
-  ctx.strokeStyle = colorWithAlpha(ringColor,.96);
-  ctx.lineWidth = 3;
-  ctx.stroke();
-
-  ctx.beginPath();
-  ctx.arc(12,0,2.5,0,Math.PI*2);
-  ctx.fillStyle = "#f3fffc";
-  ctx.fill();
-
-  ctx.beginPath();
-  ctx.moveTo(11,-1);
-  ctx.quadraticCurveTo(17,-9,23,-10);
-  ctx.moveTo(11,1);
-  ctx.quadraticCurveTo(18,8,24,9);
-  ctx.strokeStyle = colorWithAlpha(ringColor,.72);
-  ctx.lineWidth = 1;
-  ctx.stroke();
 
   ctx.restore();
 
+  drawButterfly(head, heading, 0);
 }
-
-
-function drawOrganism(){
-
-  ctx.save();
-
-
-  ctx.globalCompositeOperation =
-    "lighter";
-
-
-  /*
-     BODY
-  */
-
-  for(
-    let i = NODE_COUNT - 1;
-    i >= 0;
-    i--
-  ){
-
-    const node =
-      nodes[i];
-
-
-    const progress =
-      1 -
-      i / NODE_COUNT;
-
-
-    const radius =
-      node.size *
-      (
-        0.70 +
-        progress * 0.30
-      );
-
-
-    /*
-       Glow
-    */
-
-    ctx.beginPath();
-
-    ctx.arc(
-      node.x,
-      node.y,
-      radius * 3.5,
-      0,
-      Math.PI*2
-    );
-
-
-    ctx.fillStyle =
-      "rgba(52,255,195," +
-      (
-        0.015 +
-        progress * 0.025
-      ) +
-      ")";
-
-
-    ctx.fill();
-
-
-    /*
-       Body
-    */
-
-    ctx.beginPath();
-
-    ctx.arc(
-      node.x,
-      node.y,
-      radius,
-      0,
-      Math.PI*2
-    );
-
-
-    ctx.fillStyle =
-      "rgba(52,255,195," +
-      (
-        0.035 +
-        progress * 0.23
-      ) +
-      ")";
-
-
-    ctx.fill();
-
-  }
-
-
-  /* =================================================
-     HEAD
-  ================================================= */
-
-  const head =
-    nodes[0];
-
-
-  const tail = nodes[1];
-  const heading = Math.atan2(head.y - tail.y, head.x - tail.x);
-
-  const glow = ctx.createRadialGradient(
-    head.x,
-    head.y,
-    0,
-    head.x,
-    head.y,
-    82
-  );
-
-  glow.addColorStop(0,"rgba(255,255,255,.72)");
-  glow.addColorStop(.12,colorWithAlpha(ringColor,.46));
-  glow.addColorStop(.42,colorWithAlpha(trailColor,.16));
-  glow.addColorStop(1,"rgba(0,0,0,0)");
-
-  ctx.fillStyle = glow;
-  ctx.fillRect(head.x - 82,head.y - 82,164,164);
-
-  drawButterfly(head,heading);
-
-
-  /* Fine orbit rings add motion without changing the head's size. */
-  ctx.strokeStyle = colorWithAlpha(ringColor, .20);
-  ctx.lineWidth = 1;
-  ctx.beginPath();
-  ctx.ellipse(head.x, head.y, 27, 10, time * 0.0015, 0, Math.PI * 2);
-  ctx.stroke();
-
-  ctx.strokeStyle = colorWithAlpha(ringColor, .12);
-  ctx.beginPath();
-  ctx.ellipse(head.x, head.y, 35, 13, -time * 0.001, 0, Math.PI * 2);
-  ctx.stroke();
-
-
-  /*
-     ORBIT PIXELS
-  */
-
-  for(
-    let i = 0;
-    i < 12;
-    i++
-  ){
-
-    const angle =
-      time * 0.003 +
-      i *
-      (
-        Math.PI*2 / 12
-      );
-
-
-    const distance =
-      25 +
-      Math.sin(
-        time * 0.006 +
-        i
-      ) * 2;
-
-
-    const px =
-      head.x +
-      Math.cos(angle) *
-      distance;
-
-
-    const py =
-      head.y +
-      Math.sin(angle) *
-      distance;
-
-
-    ctx.fillStyle =
-      colorWithAlpha(ringColor, .72);
-
-
-    ctx.fillRect(
-      px - 1,
-      py - 1,
-      2,
-      2
-    );
-
-  }
-
-
-  ctx.restore();
-
-}
-
 
 /* =====================================================
-   MAIN ANIMATION LOOP
+   RENDER
 ===================================================== */
+function render(delta){
+  ctx.fillStyle = "rgba(0,0,0,0.22)";
+  ctx.fillRect(0, 0, W, H);
 
-function animate(timestamp){
+  updateTarget(delta);
+  updateOrganism(delta);
 
-  if(!animationRunning){
-
-    return;
-
-  }
-
-
-  /* Queue the next frame first so one transient drawing error cannot kill the loop. */
-  animationFrameId = requestAnimationFrame(animate);
-
-
-  const now = Number.isFinite(timestamp)
-    ? timestamp
-    : performance.now();
-
-  const delta = lastFrameTimestamp === null
-    ? 1
-    : Math.min(
-        Math.max((now - lastFrameTimestamp) / (1000 / 60), 0),
-        2
-      );
-
-  lastFrameTimestamp = now;
-  time += delta;
-
-
-  try{
-
-    ctx.setTransform(
-      DPR,
-      0,
-      0,
-      DPR,
-      0,
-      0
-    );
-
-
-    updateTarget(delta);
-    updateOrganism(delta);
-
-
-    ctx.fillStyle = "#000";
-    ctx.fillRect(0, 0, W, H);
-
-
-    const backgroundGlow = ctx.createRadialGradient(
-      target.x,
-      target.y,
-      0,
-      target.x,
-      target.y,
-      Math.max(W,H) * 0.55
-    );
-
-    backgroundGlow.addColorStop(0, "rgba(30,255,190,.045)");
-    backgroundGlow.addColorStop(1, "rgba(0,0,0,0)");
-
-    ctx.fillStyle = backgroundGlow;
-    ctx.fillRect(0, 0, W, H);
-
-
-    drawTouchRipples(delta);
-    drawTrail(delta);
-    drawOrganism();
-
-  }catch(error){
-
-    /* Keep requesting frames and surface a useful diagnostic instead of freezing. */
-    console.error("Animation frame recovered after a drawing error:", error);
-    status.textContent = "ANIMATION RECOVERING";
-
-  }
-
+  drawTrail(delta);
+  drawTouchRipples(delta);
+  drawSparks(delta);
+  drawOrganism();
 }
 
+/* =====================================================
+   LOOP
+===================================================== */
+function loop(timestamp){
+  if(!animationRunning) return;
+
+  if(lastFrameTimestamp === null) lastFrameTimestamp = timestamp;
+
+  const rawDelta = (timestamp - lastFrameTimestamp) / 16.6667;
+  lastFrameTimestamp = timestamp;
+
+  const delta = Math.min(Math.max(rawDelta, 0.2), 2.5);
+
+  time += 16.6667 * delta;
+
+  render(delta);
+
+  animationFrameId = requestAnimationFrame(loop);
+}
 
 function startAnimation(){
-
-  if(animationRunning || document.hidden){
-
-    return;
-
-  }
-
-
+  if(animationRunning) return;
   animationRunning = true;
   lastFrameTimestamp = null;
-  animationFrameId = requestAnimationFrame(animate);
-
+  animationFrameId = requestAnimationFrame(loop);
 }
-
 
 function stopAnimation(){
-
   animationRunning = false;
-
   if(animationFrameId !== null){
-
     cancelAnimationFrame(animationFrameId);
     animationFrameId = null;
-
   }
-
-
-  lastFrameTimestamp = null;
-
 }
 
-
 /* =====================================================
-   START
+   KICK OFF
 ===================================================== */
-
 startAnimation();
-
+  
 })();
-
 </script>
 
 </body>
