@@ -94,6 +94,134 @@ canvas{
     0 0 18px #35ffc4;
 }
 
+.colors-toggle{
+  position:absolute;
+  top:18px;
+  right:18px;
+  display:flex;
+  align-items:center;
+  gap:8px;
+  padding:10px 12px;
+  border:1px solid rgba(130,255,220,.24);
+  border-radius:999px;
+  background:rgba(4,18,16,.78);
+  color:rgba(235,255,249,.88);
+  font-size:9px;
+  letter-spacing:1.8px;
+  cursor:pointer;
+  pointer-events:auto;
+  touch-action:manipulation;
+  backdrop-filter:blur(12px);
+  -webkit-backdrop-filter:blur(12px);
+  transition:border-color .18s ease, background .18s ease, transform .18s ease;
+}
+
+.colors-toggle:hover,
+.colors-toggle[aria-expanded="true"]{
+  border-color:rgba(130,255,220,.58);
+  background:rgba(9,30,25,.92);
+  transform:translateY(-1px);
+}
+
+.colors-toggle:focus-visible,
+.preset:focus-visible,
+.colors-panel input:focus-visible{
+  outline:2px solid rgba(130,255,220,.8);
+  outline-offset:3px;
+}
+
+.colors-icon{
+  width:10px;
+  height:10px;
+  border:1px solid rgba(255,255,255,.65);
+  border-radius:50%;
+  background:linear-gradient(135deg,#34ffc3 50%,#ae8aff 50%);
+  box-shadow:0 0 10px rgba(52,255,195,.42);
+}
+
+.colors-panel{
+  position:absolute;
+  top:62px;
+  right:18px;
+  width:232px;
+  padding:14px;
+  border:1px solid rgba(130,255,220,.2);
+  border-radius:14px;
+  background:rgba(5,13,14,.91);
+  color:rgba(239,255,250,.84);
+  box-shadow:0 14px 44px rgba(0,0,0,.42), 0 0 26px rgba(52,255,195,.07);
+  pointer-events:auto;
+  backdrop-filter:blur(16px);
+  -webkit-backdrop-filter:blur(16px);
+}
+
+.colors-panel[hidden]{
+  display:none;
+}
+
+.panel-title{
+  margin-bottom:12px;
+  color:rgba(255,255,255,.48);
+  font-size:8px;
+  letter-spacing:2px;
+}
+
+.color-row{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  min-height:38px;
+  color:rgba(239,255,250,.8);
+  font-size:11px;
+  letter-spacing:.5px;
+}
+
+.color-row input[type="color"]{
+  width:38px;
+  height:26px;
+  padding:2px;
+  border:1px solid rgba(255,255,255,.2);
+  border-radius:7px;
+  background:rgba(255,255,255,.08);
+  cursor:pointer;
+}
+
+.presets-label{
+  margin:10px 0 8px;
+  color:rgba(255,255,255,.38);
+  font-size:8px;
+  letter-spacing:1.5px;
+}
+
+.presets{
+  display:flex;
+  flex-wrap:wrap;
+  gap:6px;
+}
+
+.preset{
+  padding:7px 8px;
+  border:1px solid rgba(255,255,255,.12);
+  border-radius:999px;
+  background:rgba(255,255,255,.04);
+  color:rgba(245,255,250,.72);
+  font-size:8px;
+  letter-spacing:.7px;
+  cursor:pointer;
+  touch-action:manipulation;
+}
+
+.preset:hover{
+  border-color:rgba(130,255,220,.45);
+  color:#fff;
+}
+
+@media(max-width:480px){
+  .title{left:14px;transform:none;letter-spacing:2.5px;}
+  .colors-toggle{top:12px;right:12px;padding:9px 10px;}
+  .colors-panel{top:56px;right:12px;width:min(232px,calc(100vw - 24px));}
+}
+
 </style>
 </head>
 
@@ -106,6 +234,39 @@ canvas{
   <div class="title">
     DIGITAL ORGANISM
   </div>
+
+  <button
+    id="colorsToggle"
+    class="colors-toggle"
+    type="button"
+    aria-expanded="false"
+    aria-controls="colorsPanel"
+  >
+    <span class="colors-icon" aria-hidden="true"></span>
+    <span>COLORS</span>
+  </button>
+
+  <section id="colorsPanel" class="colors-panel" aria-label="Light effect colors" hidden>
+    <div class="panel-title">LIVE LIGHT COLORS</div>
+
+    <label class="color-row" for="trailColor">
+      <span>Finger trail</span>
+      <input id="trailColor" type="color" value="#34ffc3">
+    </label>
+
+    <label class="color-row" for="ringColor">
+      <span>Orbit rings</span>
+      <input id="ringColor" type="color" value="#34ffc3">
+    </label>
+
+    <div class="presets-label">QUICK PALETTES</div>
+    <div class="presets">
+      <button class="preset" type="button" data-trail="#34ffc3" data-rings="#82ffdc">JADE</button>
+      <button class="preset" type="button" data-trail="#9d74ff" data-rings="#d1adff">VIOLET</button>
+      <button class="preset" type="button" data-trail="#ff875f" data-rings="#ffd17a">EMBER</button>
+      <button class="preset" type="button" data-trail="#4bdcff" data-rings="#a4f2ff">ICE</button>
+    </div>
+  </section>
 
   <div class="status">
     <span class="dot"></span>
@@ -138,6 +299,90 @@ const ctx =
 
 const status =
   document.getElementById("status");
+
+const colorsToggle =
+  document.getElementById("colorsToggle");
+
+const colorsPanel =
+  document.getElementById("colorsPanel");
+
+const trailColorInput =
+  document.getElementById("trailColor");
+
+const ringColorInput =
+  document.getElementById("ringColor");
+
+let trailColor = trailColorInput.value;
+
+let ringColor = ringColorInput.value;
+
+
+function colorWithAlpha(hex,alpha){
+
+  const value = hex.replace("#", "");
+
+  const red = parseInt(value.slice(0,2),16);
+  const green = parseInt(value.slice(2,4),16);
+  const blue = parseInt(value.slice(4,6),16);
+
+  return `rgba(${red},${green},${blue},${alpha})`;
+
+}
+
+
+function setColorsPanelOpen(open){
+
+  colorsPanel.hidden = !open;
+  colorsToggle.setAttribute("aria-expanded", String(open));
+
+}
+
+
+colorsToggle.addEventListener("click", () => {
+
+  setColorsPanelOpen(colorsPanel.hidden);
+
+});
+
+
+trailColorInput.addEventListener("input", () => {
+
+  trailColor = trailColorInput.value;
+
+});
+
+
+ringColorInput.addEventListener("input", () => {
+
+  ringColor = ringColorInput.value;
+
+});
+
+
+for(const preset of colorsPanel.querySelectorAll(".preset")){
+
+  preset.addEventListener("click", () => {
+
+    trailColor = preset.dataset.trail;
+    ringColor = preset.dataset.rings;
+    trailColorInput.value = trailColor;
+    ringColorInput.value = ringColor;
+
+  });
+
+}
+
+
+window.addEventListener("keydown", (event) => {
+
+  if(event.key === "Escape" && !colorsPanel.hidden){
+
+    setColorsPanelOpen(false);
+    colorsToggle.focus();
+
+  }
+
+});
 
 
 let W = window.innerWidth;
@@ -789,7 +1034,7 @@ function drawTrail(delta = 1){
     ctx.beginPath();
     ctx.moveTo(previous.x, previous.y);
     ctx.lineTo(current.x, current.y);
-    ctx.strokeStyle = `rgba(52,255,195,${life * 0.24})`;
+    ctx.strokeStyle = colorWithAlpha(trailColor, life * 0.24);
     ctx.lineWidth = 1 + life * 3;
     ctx.stroke();
 
@@ -1005,13 +1250,13 @@ function drawOrganism(){
 
 
   /* Fine orbit rings add motion without changing the head's size. */
-  ctx.strokeStyle = "rgba(52,255,195,.20)";
+  ctx.strokeStyle = colorWithAlpha(ringColor, .20);
   ctx.lineWidth = 1;
   ctx.beginPath();
   ctx.ellipse(head.x, head.y, 27, 10, time * 0.0015, 0, Math.PI * 2);
   ctx.stroke();
 
-  ctx.strokeStyle = "rgba(130,255,220,.12)";
+  ctx.strokeStyle = colorWithAlpha(ringColor, .12);
   ctx.beginPath();
   ctx.ellipse(head.x, head.y, 35, 13, -time * 0.001, 0, Math.PI * 2);
   ctx.stroke();
@@ -1056,7 +1301,7 @@ function drawOrganism(){
 
 
     ctx.fillStyle =
-      "rgba(52,255,195,.72)";
+      colorWithAlpha(ringColor, .72);
 
 
     ctx.fillRect(
