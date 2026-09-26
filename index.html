@@ -186,6 +186,13 @@ canvas{
   cursor:pointer;
 }
 
+.color-row input[type="checkbox"]{
+  width:16px;
+  height:16px;
+  accent-color:#34ffc3;
+  cursor:pointer;
+}
+
 .presets-label{
   margin:10px 0 8px;
   color:rgba(255,255,255,.38);
@@ -259,6 +266,11 @@ canvas{
       <input id="ringColor" type="color" value="#34ffc3">
     </label>
 
+    <label class="color-row" for="touchSound">
+      <span>Touch chime</span>
+      <input id="touchSound" type="checkbox" checked>
+    </label>
+
     <div class="presets-label">QUICK PALETTES</div>
     <div class="presets">
       <button class="preset" type="button" data-trail="#34ffc3" data-rings="#82ffdc">JADE</button>
@@ -312,9 +324,16 @@ const trailColorInput =
 const ringColorInput =
   document.getElementById("ringColor");
 
+const touchSoundToggle =
+  document.getElementById("touchSound");
+
 let trailColor = trailColorInput.value;
 
 let ringColor = ringColorInput.value;
+
+let touchSoundEnabled = touchSoundToggle.checked;
+
+let audioContext = null;
 
 
 function colorWithAlpha(hex,alpha){
@@ -326,6 +345,69 @@ function colorWithAlpha(hex,alpha){
   const blue = parseInt(value.slice(4,6),16);
 
   return `rgba(${red},${green},${blue},${alpha})`;
+
+}
+
+
+function playTouchChime(){
+
+  if(!touchSoundEnabled){
+
+    return;
+
+  }
+
+
+  const AudioContextClass =
+    window.AudioContext ||
+    window.webkitAudioContext;
+
+
+  if(!AudioContextClass){
+
+    return;
+
+  }
+
+
+  try{
+
+    if(!audioContext){
+
+      audioContext = new AudioContextClass();
+
+    }
+
+
+    if(audioContext.state === "suspended"){
+
+      audioContext.resume();
+
+    }
+
+
+    const now = audioContext.currentTime;
+    const oscillator = audioContext.createOscillator();
+    const volume = audioContext.createGain();
+
+    oscillator.type = "sine";
+    oscillator.frequency.setValueAtTime(740,now);
+    oscillator.frequency.exponentialRampToValueAtTime(1180,now + .11);
+
+    volume.gain.setValueAtTime(.0001,now);
+    volume.gain.exponentialRampToValueAtTime(.045,now + .012);
+    volume.gain.exponentialRampToValueAtTime(.0001,now + .24);
+
+    oscillator.connect(volume);
+    volume.connect(audioContext.destination);
+    oscillator.start(now);
+    oscillator.stop(now + .25);
+
+  }catch(error){
+
+    console.warn("Touch chime is unavailable in this browser.");
+
+  }
 
 }
 
@@ -355,6 +437,13 @@ trailColorInput.addEventListener("input", () => {
 ringColorInput.addEventListener("input", () => {
 
   ringColor = ringColorInput.value;
+
+});
+
+
+touchSoundToggle.addEventListener("change", () => {
+
+  touchSoundEnabled = touchSoundToggle.checked;
 
 });
 
@@ -474,7 +563,7 @@ for(let i = 0; i < NODE_COUNT; i++){
 
 
 /* =====================================================
-   PARTICLES
+   TOUCH RIPPLE
 ===================================================== */
 
 /* =====================================================
@@ -482,6 +571,8 @@ for(let i = 0; i < NODE_COUNT; i++){
 ===================================================== */
 
 const trail = [];
+
+const touchRipples = [];
 
 
 /* =====================================================
@@ -593,6 +684,23 @@ function startTouch(e){
 
   status.textContent =
     "TRACKING YOUR FINGER";
+
+
+  playTouchChime();
+
+
+  touchRipples.push({
+    x:e.clientX,
+    y:e.clientY,
+    radius:8,
+    life:1
+  });
+
+  if(touchRipples.length > 5){
+
+    touchRipples.shift();
+
+  }
 
 
   trail.push({
@@ -980,6 +1088,41 @@ function updateOrganism(delta = 1){
 
 
 /* =====================================================
+   DRAW TOUCH RIPPLE
+===================================================== */
+
+function drawTouchRipples(delta = 1){
+
+  ctx.save();
+  ctx.globalCompositeOperation = "lighter";
+
+  for(let i = touchRipples.length - 1; i >= 0; i--){
+
+    const ripple = touchRipples[i];
+    ripple.radius += 2.2 * delta;
+    ripple.life -= .035 * delta;
+
+    if(ripple.life <= 0){
+
+      touchRipples.splice(i,1);
+      continue;
+
+    }
+
+    ctx.beginPath();
+    ctx.arc(ripple.x,ripple.y,ripple.radius,0,Math.PI*2);
+    ctx.strokeStyle = colorWithAlpha(ringColor,ripple.life * .58);
+    ctx.lineWidth = 1 + ripple.life * 1.5;
+    ctx.stroke();
+
+  }
+
+  ctx.restore();
+
+}
+
+
+/* =====================================================
    DRAW TRAIL
 ===================================================== */
 
@@ -1051,9 +1194,10 @@ function drawTrail(delta = 1){
 
 function drawButterfly(head,heading){
 
-  const wingBeat =
-    0.58 +
-    Math.abs(Math.sin(time * 0.11)) * 0.42;
+  const wingSpeed = touching ? .30 : .11;
+  const wingBase = touching ? .48 : .58;
+  const wingRange = touching ? .50 : .42;
+  const wingBeat = wingBase + Math.abs(Math.sin(time * wingSpeed)) * wingRange;
 
 
   ctx.save();
@@ -1393,6 +1537,7 @@ function animate(timestamp){
     ctx.fillRect(0, 0, W, H);
 
 
+    drawTouchRipples(delta);
     drawTrail(delta);
     drawOrganism();
 
