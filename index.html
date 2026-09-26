@@ -175,21 +175,23 @@ let touching = false;
 let pointerId = null;
 
 const finger = { x: W/2, y: H/2 };
-const target = { x: W/2, y: H/2, vx: 0, vy: 0 };
+const target = { x: W * .14, y: H * .48, vx: 0, vy: 0 };
 
 /* =====================================================
    ORGANISM NODES
 ===================================================== */
 const nodes = [];
-const NODE_COUNT = 38;
+const NODE_COUNT = 46;
+const initialSpan = W * .72;
 
 for(let i = 0; i < NODE_COUNT; i++){
-  const initialX = W/2 - i * 5;
-  const initialY = H/2 + Math.sin(i * 0.24) * 12;
+  const progress = i / (NODE_COUNT - 1);
+  const initialX = (W - initialSpan) / 2 + progress * initialSpan;
+  const initialY = H * .48 - H * .18 * Math.sin(Math.PI * progress) + H * .31 * Math.pow(progress,5) + Math.sin(i * .24) * 4;
   nodes.push({
     x: initialX, y: initialY,
     vx: 0, vy: 0,
-    size: 15 - i * 0.27
+    size: 15 - i * .27
   });
 }
 
@@ -212,7 +214,7 @@ function resize(){
 
   ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
 
-  if(!touching){ target.x = W/2; target.y = H/2; }
+  if(!touching){ target.x = W * .14; target.y = H * .48; }
 }
 window.addEventListener("resize", resize);
 resize();
@@ -338,7 +340,7 @@ function updateOrganism(delta = 1){
     const node = nodes[i];
     const previous = i === 0 ? target : nodes[i-1];
 
-    if(touching && i === 0){
+    if(i === 0){
       node.x = target.x;
       node.y = target.y;
       node.vx = 0;
@@ -362,6 +364,33 @@ function updateOrganism(delta = 1){
     node.y += Math.sin(time * 0.005 + i) * wave * 0.16 * delta;
   }
 }
+
+function constrainSegments(){
+
+  const maxSegmentLength = initialSpan / (NODE_COUNT - 1) * 3.4;
+
+  for(let i = 1; i < nodes.length; i++){
+
+    const previous = nodes[i-1];
+    const node = nodes[i];
+    const dx = node.x - previous.x;
+    const dy = node.y - previous.y;
+    const distance = Math.hypot(dx,dy);
+
+    if(distance > maxSegmentLength){
+
+      const scale = maxSegmentLength / distance;
+      node.x = previous.x + dx * scale;
+      node.y = previous.y + dy * scale;
+      node.vx *= .45;
+      node.vy *= .45;
+
+    }
+
+  }
+
+}
+
 
 /* =====================================================
    DRAW RIPPLE
@@ -443,150 +472,311 @@ function drawSparks(delta = 1){
   ctx.restore();
 }
 
-/* =====================================================
-   DRAW BUTTERFLY
-===================================================== */
-function drawButterfly(head, heading, index){
-  const wingSpeed = touching ? .30 : .11;
-  const wingBase  = touching ? .48 : .58;
-  const wingRange = touching ? .50 : .42;
-  const wingBeat  = wingBase + Math.abs(Math.sin(time * wingSpeed + index * 0.05)) * wingRange;
+function drawSkeleton(head,heading){
 
   ctx.save();
-  ctx.translate(head.x, head.y);
-  ctx.rotate(heading);
   ctx.globalCompositeOperation = "lighter";
+  ctx.lineCap = "round";
+  ctx.lineJoin = "round";
 
-  const aura = ctx.createRadialGradient(0, 0, 0, 0, 0, 70);
-  aura.addColorStop(0, colorWithAlpha(ringColor, .22));
-  aura.addColorStop(.5, colorWithAlpha(ringColor, .06));
-  aura.addColorStop(1, colorWithAlpha(ringColor, 0));
-  ctx.fillStyle = aura;
+
+  /* A faint continuous backbone holds the articulated segments together. */
   ctx.beginPath();
-  ctx.arc(0, 0, 70, 0, Math.PI * 2);
-  ctx.fill();
+  ctx.moveTo(nodes[0].x,nodes[0].y);
 
-  for(const side of [-1, 1]){
-    ctx.save();
-    ctx.scale(1, side * wingBeat);
+  for(let i = 1; i < nodes.length; i++){
 
-    ctx.beginPath();
-    ctx.moveTo(0, 0);
-    ctx.bezierCurveTo(-8, -9, -8, -31, 4, -39);
-    ctx.bezierCurveTo(16, -48, 33, -39, 30, -26);
-    ctx.bezierCurveTo(29, -18, 20, -13, 12, -10);
-    ctx.bezierCurveTo(28, -16, 40, -8, 34, 3);
-    ctx.bezierCurveTo(28, 14, 12, 10, 0, 2);
-    ctx.closePath();
+    ctx.lineTo(nodes[i].x,nodes[i].y);
 
-    const wingGlow = ctx.createLinearGradient(0, -42, 34, 2);
-    wingGlow.addColorStop(0, colorWithAlpha(ringColor, .78));
-    wingGlow.addColorStop(.56, colorWithAlpha(trailColor, .32));
-    wingGlow.addColorStop(1, colorWithAlpha(trailColor, .08));
-    ctx.fillStyle = wingGlow;
-    ctx.fill();
-
-    ctx.strokeStyle = colorWithAlpha(ringColor, .88);
-    ctx.lineWidth = 1.15;
-    ctx.stroke();
-
-    ctx.beginPath();
-    ctx.moveTo(1, 0);
-    ctx.bezierCurveTo(8, -12, 17, -24, 27, -34);
-    ctx.moveTo(5, 1);
-    ctx.bezierCurveTo(16, -3, 25, -5, 34, -2);
-    ctx.moveTo(3, -2);
-    ctx.bezierCurveTo(5, -13, 5, -24, 7, -39);
-    ctx.strokeStyle = colorWithAlpha(ringColor, .48);
-    ctx.lineWidth = 0.7;
-    ctx.stroke();
-
-    ctx.beginPath();
-    ctx.arc(18, -30, 1.6, 0, Math.PI * 2);
-    ctx.arc(24, -18, 1.2, 0, Math.PI * 2);
-    ctx.fillStyle = colorWithAlpha("#ffffff", .55);
-    ctx.fill();
-
-    ctx.restore();
   }
 
-  const bodyGrad = ctx.createLinearGradient(-6, 0, 6, 0);
-  bodyGrad.addColorStop(0, colorWithAlpha(trailColor, .9));
-  bodyGrad.addColorStop(.5, colorWithAlpha("#ffffff", .95));
-  bodyGrad.addColorStop(1, colorWithAlpha(trailColor, .9));
-
-  ctx.beginPath();
-  ctx.ellipse(0, 0, 6, 9, 0, 0, Math.PI * 2);
-  ctx.fillStyle = bodyGrad;
-  ctx.fill();
-
-  ctx.beginPath();
-  ctx.arc(3, -5, 1.6, 0, Math.PI * 2);
-  ctx.arc(-3, -5, 1.6, 0, Math.PI * 2);
-  ctx.fillStyle = "#ffffff";
-  ctx.shadowColor = ringColor;
-  ctx.shadowBlur = 8;
-  ctx.fill();
-  ctx.shadowBlur = 0;
-
-  const t = time * 0.008;
-  ctx.beginPath();
-  ctx.moveTo(2, -9);
-  ctx.quadraticCurveTo(6 + Math.sin(t) * 2, -18, 4 + Math.sin(t) * 3, -26);
-  ctx.moveTo(-2, -9);
-  ctx.quadraticCurveTo(-6 + Math.sin(t + 1) * 2, -18, -4 + Math.sin(t + 1) * 3, -26);
-  ctx.strokeStyle = colorWithAlpha(ringColor, .7);
-  ctx.lineWidth = 0.9;
+  ctx.strokeStyle = colorWithAlpha(trailColor,.20);
+  ctx.lineWidth = 9;
   ctx.stroke();
 
   ctx.beginPath();
-  ctx.arc(4 + Math.sin(t) * 3, -26, 1.8, 0, Math.PI * 2);
-  ctx.arc(-4 + Math.sin(t + 1) * 3, -26, 1.8, 0, Math.PI * 2);
-  ctx.fillStyle = colorWithAlpha("#ffffff", .9);
-  ctx.shadowColor = ringColor;
-  ctx.shadowBlur = 10;
-  ctx.fill();
-  ctx.shadowBlur = 0;
+  ctx.moveTo(nodes[0].x,nodes[0].y);
 
-  ctx.restore();
-}
+  for(let i = 1; i < nodes.length; i++){
 
-/* =====================================================
-   DRAW ORGANISM
-===================================================== */
-function drawOrganism(){
-  const head = nodes[0];
-  const next = nodes[1] || head;
-  const heading = Math.atan2(head.y - next.y, head.x - next.x);
+    ctx.lineTo(nodes[i].x,nodes[i].y);
 
-  ctx.save();
-  ctx.globalCompositeOperation = "lighter";
-
-  for(let i = nodes.length - 1; i >= 1; i--){
-    const node = nodes[i];
-    const progress = i / nodes.length;
-    const size = Math.max(0.5, node.size * (1 - progress * 0.7));
-    const alpha = (1 - progress) * 0.55 + 0.05;
-
-    const glow = ctx.createRadialGradient(node.x, node.y, 0, node.x, node.y, size * 3);
-    glow.addColorStop(0, colorWithAlpha(ringColor, alpha * 0.6));
-    glow.addColorStop(1, colorWithAlpha(ringColor, 0));
-
-    ctx.fillStyle = glow;
-    ctx.beginPath();
-    ctx.arc(node.x, node.y, size * 3, 0, Math.PI * 2);
-    ctx.fill();
-
-    ctx.beginPath();
-    ctx.arc(node.x, node.y, size, 0, Math.PI * 2);
-    ctx.fillStyle = colorWithAlpha(trailColor, alpha);
-    ctx.fill();
   }
 
+  ctx.strokeStyle = colorWithAlpha(ringColor,.82);
+  ctx.lineWidth = 1.5;
+  ctx.stroke();
+
+
+  /* Repeated oval ribs follow the spine and taper at both ends. */
+  for(let i = 1; i < nodes.length - 1; i++){
+
+    const node = nodes[i];
+    const before = nodes[i-1];
+    const after = nodes[i+1];
+    const spineAngle = Math.atan2(after.y - before.y,after.x - before.x);
+    const taper = Math.sin(Math.PI * i / (nodes.length - 1));
+    const ribLength = 3 + taper * 22;
+    const alpha = .38 + (i % 2) * .22 + taper * .18;
+
+    ctx.beginPath();
+    ctx.ellipse(node.x,node.y,4.2,ribLength,spineAngle,0,Math.PI*2);
+    ctx.strokeStyle = colorWithAlpha(ringColor,alpha);
+    ctx.lineWidth = .9 + taper * .55;
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.arc(node.x,node.y,1.35,0,Math.PI*2);
+    ctx.fillStyle = colorWithAlpha(trailColor,.72);
+    ctx.fill();
+
+  }
+
+
+  const tail = nodes[nodes.length - 1];
+  const tailBefore = nodes[nodes.length - 2];
+  const tailLength = Math.hypot(tail.x - tailBefore.x,tail.y - tailBefore.y) || 1;
+  const tailX = (tail.x - tailBefore.x) / tailLength;
+  const tailY = (tail.y - tailBefore.y) / tailLength;
+  const tailNormalX = -tailY;
+  const tailNormalY = tailX;
+  const tailTipX = tail.x + tailX * 17;
+  const tailTipY = tail.y + tailY * 17;
+
+  ctx.beginPath();
+  ctx.moveTo(tail.x,tail.y);
+  ctx.lineTo(tailTipX,tailTipY);
+  ctx.moveTo(tail.x + tailNormalX * 4,tail.y + tailNormalY * 4);
+  ctx.lineTo(tailTipX + tailNormalX * 8,tailTipY + tailNormalY * 8);
+  ctx.moveTo(tail.x - tailNormalX * 4,tail.y - tailNormalY * 4);
+  ctx.lineTo(tailTipX - tailNormalX * 8,tailTipY - tailNormalY * 8);
+  ctx.strokeStyle = colorWithAlpha(ringColor,.72);
+  ctx.lineWidth = 1.2;
+  ctx.stroke();
+
+
+  /* Five articulated leg pairs with bright joints and small hooked feet. */
+  for(let i = 7; i < nodes.length - 4; i += 8){
+
+    const node = nodes[i];
+    const before = nodes[i-1];
+    const after = nodes[i+1];
+    const dx = after.x - before.x;
+    const dy = after.y - before.y;
+    const length = Math.hypot(dx,dy) || 1;
+    const tangentX = dx / length;
+    const tangentY = dy / length;
+    const normalX = -tangentY;
+    const normalY = tangentX;
+    const bodyTaper = Math.sin(Math.PI * i / (nodes.length - 1));
+    const legLength = 20 + bodyTaper * 13;
+    const bendDirection = i % 16 === 7 ? 1 : -1;
+
+    for(const side of [-1,1]){
+
+      const kneeX = node.x + normalX * side * legLength * .52 + tangentX * bendDirection * legLength * .28;
+      const kneeY = node.y + normalY * side * legLength * .52 + tangentY * bendDirection * legLength * .28;
+      const footX = kneeX + normalX * side * legLength * .46 + tangentX * bendDirection * legLength * .38;
+      const footY = kneeY + normalY * side * legLength * .46 + tangentY * bendDirection * legLength * .38;
+
+      ctx.beginPath();
+      ctx.moveTo(node.x,node.y);
+      ctx.lineTo(kneeX,kneeY);
+      ctx.lineTo(footX,footY);
+      ctx.strokeStyle = colorWithAlpha(ringColor,.82);
+      ctx.lineWidth = 1.7;
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.arc(kneeX,kneeY,2,0,Math.PI*2);
+      ctx.fillStyle = colorWithAlpha(trailColor,.96);
+      ctx.fill();
+
+      ctx.beginPath();
+      ctx.moveTo(footX,footY);
+      ctx.lineTo(footX + tangentX * bendDirection * 4 - normalX * side * 3,
+                 footY + tangentY * bendDirection * 4 - normalY * side * 3);
+      ctx.strokeStyle = colorWithAlpha(ringColor,.7);
+      ctx.lineWidth = 1;
+      ctx.stroke();
+
+    }
+
+  }
+
+
+  /* Small angular skull points in the direction the creature is moving. */
+  ctx.save();
+  ctx.translate(head.x,head.y);
+  ctx.rotate(heading);
+  ctx.beginPath();
+  ctx.moveTo(16,0);
+  ctx.lineTo(8,-6);
+  ctx.lineTo(-4,-7);
+  ctx.lineTo(-12,-3);
+  ctx.lineTo(-13,3);
+  ctx.lineTo(-4,7);
+  ctx.lineTo(8,6);
+  ctx.closePath();
+  ctx.fillStyle = colorWithAlpha(trailColor,.22);
+  ctx.fill();
+  ctx.strokeStyle = colorWithAlpha(ringColor,.95);
+  ctx.lineWidth = 1.6;
+  ctx.stroke();
+
+  ctx.beginPath();
+  ctx.moveTo(1,-5);
+  ctx.lineTo(8,-2);
+  ctx.moveTo(1,5);
+  ctx.lineTo(8,2);
+  ctx.strokeStyle = colorWithAlpha(ringColor,.78);
+  ctx.lineWidth = 1.1;
+  ctx.stroke();
+
+  ctx.beginPath();
+  ctx.arc(8,0,1.5,0,Math.PI*2);
+  ctx.fillStyle = "#f4fffc";
+  ctx.fill();
+
+  ctx.beginPath();
+  ctx.moveTo(12,-2);
+  ctx.quadraticCurveTo(22,-11,29,-9);
+  ctx.moveTo(12,2);
+  ctx.quadraticCurveTo(23,10,30,8);
+  ctx.strokeStyle = colorWithAlpha(ringColor,.76);
+  ctx.lineWidth = 1;
+  ctx.stroke();
+
   ctx.restore();
 
-  drawButterfly(head, heading, 0);
+  ctx.restore();
+
 }
+
+
+function drawOrganism(){
+
+  ctx.save();
+
+
+  ctx.globalCompositeOperation =
+    "lighter";
+
+
+  /* Small lit joints reveal the skeleton's repeating articulated segments. */
+  for(let i = 0; i < nodes.length; i++){
+
+    const node = nodes[i];
+    const taper = Math.sin(Math.PI * i / (nodes.length - 1));
+
+    ctx.beginPath();
+    ctx.arc(node.x,node.y,1.1 + taper * .65,0,Math.PI*2);
+    ctx.fillStyle = colorWithAlpha(trailColor,.52 + taper * .32);
+    ctx.fill();
+
+  }
+
+
+  /* =================================================
+     HEAD
+  ================================================= */
+
+  const head =
+    nodes[0];
+
+
+  const tail = nodes[1];
+  const heading = Math.atan2(head.y - tail.y, head.x - tail.x);
+
+  const glow = ctx.createRadialGradient(
+    head.x,
+    head.y,
+    0,
+    head.x,
+    head.y,
+    42
+  );
+
+  glow.addColorStop(0,"rgba(255,255,255,.34)");
+  glow.addColorStop(.22,colorWithAlpha(ringColor,.25));
+  glow.addColorStop(.58,colorWithAlpha(trailColor,.09));
+  glow.addColorStop(1,"rgba(0,0,0,0)");
+
+  ctx.fillStyle = glow;
+  ctx.fillRect(head.x - 42,head.y - 42,84,84);
+
+  drawSkeleton(head,heading);
+
+
+  /* Fine orbit rings add motion without changing the head's size. */
+  ctx.strokeStyle = colorWithAlpha(ringColor, .20);
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.ellipse(head.x, head.y, 27, 10, time * 0.0015, 0, Math.PI * 2);
+  ctx.stroke();
+
+  ctx.strokeStyle = colorWithAlpha(ringColor, .12);
+  ctx.beginPath();
+  ctx.ellipse(head.x, head.y, 35, 13, -time * 0.001, 0, Math.PI * 2);
+  ctx.stroke();
+
+
+  /*
+     ORBIT PIXELS
+  */
+
+  for(
+    let i = 0;
+    i < 12;
+    i++
+  ){
+
+    const angle =
+      time * 0.003 +
+      i *
+      (
+        Math.PI*2 / 12
+      );
+
+
+    const distance =
+      25 +
+      Math.sin(
+        time * 0.006 +
+        i
+      ) * 2;
+
+
+    const px =
+      head.x +
+      Math.cos(angle) *
+      distance;
+
+
+    const py =
+      head.y +
+      Math.sin(angle) *
+      distance;
+
+
+    ctx.fillStyle =
+      colorWithAlpha(ringColor, .72);
+
+
+    ctx.fillRect(
+      px - 1,
+      py - 1,
+      2,
+      2
+    );
+
+  }
+
+
+  ctx.restore();
+
+}
+
 
 /* =====================================================
    RENDER
@@ -597,6 +787,7 @@ function render(delta){
 
   updateTarget(delta);
   updateOrganism(delta);
+  constrainSegments();
 
   drawTrail(delta);
   drawTouchRipples(delta);
