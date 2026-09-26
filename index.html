@@ -1,0 +1,815 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+
+<meta
+  name="viewport"
+  content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"
+>
+
+<title>Digital Organism</title>
+
+<style>
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html,
+body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: #000;
+}
+
+body {
+  touch-action: none;
+  user-select: none;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+canvas {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  touch-action: none;
+}
+
+.title {
+  position: fixed;
+  top: 22px;
+  left: 50%;
+  transform: translateX(-50%);
+
+  color: rgba(255,255,255,.45);
+  font-size: 9px;
+  letter-spacing: 4px;
+
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.status {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+
+  color: rgba(255,255,255,.3);
+  font-size: 9px;
+  letter-spacing: 2px;
+
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.dot {
+  display: inline-block;
+
+  width: 5px;
+  height: 5px;
+
+  margin-right: 7px;
+
+  border-radius: 50%;
+
+  background: #35ffc4;
+
+  box-shadow:
+    0 0 6px #35ffc4,
+    0 0 18px #35ffc4;
+}
+</style>
+</head>
+
+<body>
+
+<canvas id="canvas"></canvas>
+
+<div class="title">
+  DIGITAL ORGANISM
+</div>
+
+<div class="status">
+  <span class="dot"></span>
+  <span id="statusText">TOUCH TO CONTROL</span>
+</div>
+
+<script>
+
+const canvas = document.getElementById("canvas");
+const ctx = canvas.getContext("2d");
+
+const statusText =
+  document.getElementById("statusText");
+
+let W = 0;
+let H = 0;
+let DPR = 1;
+
+let time = 0;
+
+const pointer = {
+  x: 0,
+  y: 0,
+  active: false
+};
+
+const target = {
+  x: 0,
+  y: 0
+};
+
+
+/* =========================
+   RESIZE
+========================= */
+
+function resize() {
+
+  DPR = Math.min(
+    window.devicePixelRatio || 1,
+    2
+  );
+
+  W = window.innerWidth;
+  H = window.innerHeight;
+
+  canvas.width = W * DPR;
+  canvas.height = H * DPR;
+
+  canvas.style.width = W + "px";
+  canvas.style.height = H + "px";
+
+  ctx.setTransform(
+    DPR,
+    0,
+    0,
+    DPR,
+    0,
+    0
+  );
+
+  if (!pointer.active) {
+
+    pointer.x = W / 2;
+    pointer.y = H / 2;
+
+    target.x = W / 2;
+    target.y = H / 2;
+  }
+}
+
+window.addEventListener(
+  "resize",
+  resize
+);
+
+resize();
+
+
+/* =========================
+   ORGANISM
+========================= */
+
+const nodes = [];
+
+const NODE_COUNT = 32;
+
+for (let i = 0; i < NODE_COUNT; i++) {
+
+  nodes.push({
+
+    x: W / 2,
+
+    y: H / 2,
+
+    vx: 0,
+
+    vy: 0,
+
+    size:
+      13 -
+      i * 0.25
+
+  });
+}
+
+
+/* =========================
+   PARTICLES
+========================= */
+
+const particles = [];
+
+
+function createParticles(x, y) {
+
+  for (let i = 0; i < 28; i++) {
+
+    const angle =
+      Math.random() *
+      Math.PI *
+      2;
+
+    const speed =
+      1 +
+      Math.random() * 5;
+
+    particles.push({
+
+      x: x,
+
+      y: y,
+
+      vx:
+        Math.cos(angle) *
+        speed,
+
+      vy:
+        Math.sin(angle) *
+        speed,
+
+      life: 1,
+
+      size:
+        1 +
+        Math.random() * 3
+    });
+  }
+}
+
+
+/* =========================
+   TOUCH
+========================= */
+
+function updatePointer(e) {
+
+  pointer.x = e.clientX;
+  pointer.y = e.clientY;
+
+  target.x = e.clientX;
+  target.y = e.clientY;
+
+  pointer.active = true;
+
+  statusText.textContent =
+    "TRACKING YOUR FINGER";
+}
+
+
+canvas.addEventListener(
+  "pointerdown",
+  e => {
+
+    canvas.setPointerCapture?.(
+      e.pointerId
+    );
+
+    updatePointer(e);
+
+    createParticles(
+      e.clientX,
+      e.clientY
+    );
+  }
+);
+
+
+canvas.addEventListener(
+  "pointermove",
+  e => {
+
+    updatePointer(e);
+  }
+);
+
+
+canvas.addEventListener(
+  "pointerup",
+  () => {
+
+    pointer.active = false;
+
+    statusText.textContent =
+      "TOUCH TO CONTROL";
+  }
+);
+
+
+canvas.addEventListener(
+  "pointercancel",
+  () => {
+
+    pointer.active = false;
+
+    statusText.textContent =
+      "TOUCH TO CONTROL";
+  }
+);
+
+
+/* =========================
+   UPDATE ORGANISM
+========================= */
+
+function updateOrganism() {
+
+  for (
+    let i = 0;
+    i < nodes.length;
+    i++
+  ) {
+
+    const node = nodes[i];
+
+    let tx;
+    let ty;
+
+    if (i === 0) {
+
+      tx = target.x;
+      ty = target.y;
+
+    } else {
+
+      tx = nodes[i - 1].x;
+      ty = nodes[i - 1].y;
+    }
+
+
+    const force =
+      i === 0
+        ? 0.12
+        : 0.19;
+
+
+    node.vx +=
+      (tx - node.x) *
+      force;
+
+    node.vy +=
+      (ty - node.y) *
+      force;
+
+
+    node.vx *= 0.72;
+    node.vy *= 0.72;
+
+
+    node.x += node.vx;
+    node.y += node.vy;
+
+
+    /*
+      Natural movement
+    */
+
+    const wave =
+      Math.sin(
+        time * 0.006 +
+        i * 0.65
+      );
+
+
+    node.x +=
+      Math.cos(
+        time * 0.004 +
+        i
+      ) *
+      wave *
+      0.25;
+
+
+    node.y +=
+      Math.sin(
+        time * 0.005 +
+        i
+      ) *
+      wave *
+      0.25;
+  }
+}
+
+
+/* =========================
+   DRAW ORGANISM
+========================= */
+
+function drawOrganism() {
+
+  ctx.save();
+
+  ctx.globalCompositeOperation =
+    "lighter";
+
+
+  /*
+    Body
+  */
+
+  for (
+    let i = nodes.length - 1;
+    i >= 0;
+    i--
+  ) {
+
+    const node = nodes[i];
+
+    const progress =
+      1 -
+      i / nodes.length;
+
+    const alpha =
+      0.035 +
+      progress * 0.24;
+
+    const radius =
+      node.size *
+      (
+        0.7 +
+        progress * 0.3
+      );
+
+
+    /*
+      Glow
+    */
+
+    ctx.beginPath();
+
+    ctx.arc(
+      node.x,
+      node.y,
+      radius * 3.5,
+      0,
+      Math.PI * 2
+    );
+
+    ctx.fillStyle =
+      `rgba(
+        52,
+        255,
+        195,
+        ${alpha * 0.12}
+      )`;
+
+    ctx.fill();
+
+
+    /*
+      Body node
+    */
+
+    ctx.beginPath();
+
+    ctx.arc(
+      node.x,
+      node.y,
+      radius,
+      0,
+      Math.PI * 2
+    );
+
+    ctx.fillStyle =
+      `rgba(
+        52,
+        255,
+        195,
+        ${alpha}
+      )`;
+
+    ctx.fill();
+  }
+
+
+  /*
+    HEAD
+  */
+
+  const head =
+    nodes[0];
+
+
+  const pulse =
+    1 +
+    Math.sin(
+      time * 0.008
+    ) *
+    0.08;
+
+
+  /*
+    Big glow
+  */
+
+  const glow =
+    ctx.createRadialGradient(
+      head.x,
+      head.y,
+      0,
+      head.x,
+      head.y,
+      85
+    );
+
+
+  glow.addColorStop(
+    0,
+    "rgba(255,255,255,.95)"
+  );
+
+  glow.addColorStop(
+    0.06,
+    "rgba(130,255,220,.9)"
+  );
+
+  glow.addColorStop(
+    0.22,
+    "rgba(52,255,195,.22)"
+  );
+
+  glow.addColorStop(
+    1,
+    "rgba(0,0,0,0)"
+  );
+
+
+  ctx.fillStyle = glow;
+
+  ctx.fillRect(
+    head.x - 85,
+    head.y - 85,
+    170,
+    170
+  );
+
+
+  /*
+    Head
+  */
+
+  ctx.beginPath();
+
+  ctx.arc(
+    head.x,
+    head.y,
+    15 * pulse,
+    0,
+    Math.PI * 2
+  );
+
+  ctx.fillStyle =
+    "#eafff8";
+
+  ctx.fill();
+
+
+  /*
+    Core
+  */
+
+  ctx.beginPath();
+
+  ctx.arc(
+    head.x,
+    head.y,
+    6,
+    0,
+    Math.PI * 2
+  );
+
+  ctx.fillStyle =
+    "#35ffc4";
+
+  ctx.fill();
+
+
+  /*
+    Orbiting digital pixels
+  */
+
+  for (let i = 0; i < 10; i++) {
+
+    const angle =
+      time * 0.003 +
+      i * (
+        Math.PI * 2 / 10
+      );
+
+    const distance =
+      24 +
+      Math.sin(
+        time * 0.006 + i
+      ) *
+      2;
+
+    const px =
+      head.x +
+      Math.cos(angle) *
+      distance;
+
+    const py =
+      head.y +
+      Math.sin(angle) *
+      distance;
+
+
+    ctx.fillStyle =
+      "rgba(52,255,195,.65)";
+
+    ctx.fillRect(
+      px - 1,
+      py - 1,
+      2,
+      2
+    );
+  }
+
+
+  ctx.restore();
+}
+
+
+/* =========================
+   PARTICLES
+========================= */
+
+function updateParticles() {
+
+  ctx.save();
+
+  ctx.globalCompositeOperation =
+    "lighter";
+
+
+  for (
+    let i = particles.length - 1;
+    i >= 0;
+    i--
+  ) {
+
+    const p =
+      particles[i];
+
+
+    p.x += p.vx;
+    p.y += p.vy;
+
+
+    p.vx *= 0.97;
+    p.vy *= 0.97;
+
+
+    p.life -= 0.018;
+
+
+    ctx.beginPath();
+
+    ctx.arc(
+      p.x,
+      p.y,
+      p.size * p.life,
+      0,
+      Math.PI * 2
+    );
+
+
+    ctx.fillStyle =
+      `rgba(
+        52,
+        255,
+        195,
+        ${p.life * 0.7}
+      )`;
+
+
+    ctx.fill();
+
+
+    if (p.life <= 0) {
+
+      particles.splice(
+        i,
+        1
+      );
+    }
+  }
+
+
+  ctx.restore();
+}
+
+
+/* =========================
+   MAIN LOOP
+========================= */
+
+function animate() {
+
+  time++;
+
+
+  /*
+    Idle movement
+  */
+
+  if (!pointer.active) {
+
+    target.x =
+      W / 2 +
+      Math.cos(
+        time * 0.004
+      ) *
+      Math.min(W, H) *
+      0.07;
+
+
+    target.y =
+      H / 2 +
+      Math.sin(
+        time * 0.005
+      ) *
+      Math.min(W, H) *
+      0.05;
+  }
+
+
+  /*
+    Black background
+  */
+
+  ctx.fillStyle =
+    "#000";
+
+  ctx.fillRect(
+    0,
+    0,
+    W,
+    H
+  );
+
+
+  /*
+    Very subtle green atmosphere
+  */
+
+  const backgroundGlow =
+    ctx.createRadialGradient(
+      target.x,
+      target.y,
+      0,
+      target.x,
+      target.y,
+      Math.max(W, H) * 0.55
+    );
+
+
+  backgroundGlow.addColorStop(
+    0,
+    "rgba(30,255,190,.035)"
+  );
+
+  backgroundGlow.addColorStop(
+    1,
+    "rgba(0,0,0,0)"
+  );
+
+
+  ctx.fillStyle =
+    backgroundGlow;
+
+  ctx.fillRect(
+    0,
+    0,
+    W,
+    H
+  );
+
+
+  updateOrganism();
+
+  drawOrganism();
+
+  updateParticles();
+
+
+  requestAnimationFrame(
+    animate
+  );
+}
+
+
+animate();
+
+</script>
+
+</body>
+  </html>
