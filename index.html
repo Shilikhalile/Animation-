@@ -146,6 +146,9 @@ let H = window.innerHeight;
 let DPR = 1;
 
 let time = 0;
+let animationRunning = false;
+let animationFrameId = null;
+let lastFrameTimestamp = null;
 
 
 /* =====================================================
@@ -202,11 +205,15 @@ const NODE_COUNT = 38;
 
 for(let i = 0; i < NODE_COUNT; i++){
 
+  /* Start as a softly curved body instead of a single stacked point. */
+  const initialX = W / 2 - i * 5;
+  const initialY = H / 2 + Math.sin(i * 0.24) * 12;
+
   nodes.push({
 
-    x: W / 2,
+    x: initialX,
 
-    y: H / 2,
+    y: initialY,
 
     vx: 0,
 
@@ -476,12 +483,9 @@ function moveTouch(e){
    TOUCH END
 ===================================================== */
 
-function endTouch(e){
+function releaseTouch(){
 
-  if(
-    pointerId !== null &&
-    e.pointerId !== pointerId
-  ){
+  if(!touching){
 
     return;
 
@@ -497,14 +501,25 @@ function endTouch(e){
     "FREE MOVEMENT";
 
 
-  /*
-     IMPORTANT:
+  /* The organism keeps moving on its own after release. */
 
-     We DON'T stop the organism.
+}
 
-     We simply release it from
-     finger control.
-  */
+
+function endTouch(e){
+
+  if(
+    e &&
+    pointerId !== null &&
+    e.pointerId !== pointerId
+  ){
+
+    return;
+
+  }
+
+
+  releaseTouch();
 
 }
 
@@ -541,11 +556,34 @@ canvas.addEventListener(
 );
 
 
+/* Release pointer control when the page loses focus or is backgrounded. */
+window.addEventListener("blur", releaseTouch);
+document.addEventListener("visibilitychange", () => {
+  if(document.hidden){
+    releaseTouch();
+    stopAnimation();
+  }else{
+    startAnimation();
+  }
+});
+window.addEventListener("pageshow", startAnimation);
+window.addEventListener("pagehide", stopAnimation);
+
+
+/* Recover the render loop if the browser recreates the canvas context. */
+canvas.addEventListener("contextlost", (event) => {
+  event.preventDefault();
+  stopAnimation();
+  status.textContent = "RESTORING ANIMATION";
+});
+canvas.addEventListener("contextrestored", startAnimation);
+
+
 /* =====================================================
    UPDATE TARGET
 ===================================================== */
 
-function updateTarget(){
+function updateTarget(delta = 1){
 
   if(touching){
 
@@ -557,26 +595,26 @@ function updateTarget(){
       (
         finger.x -
         target.x
-      ) * 0.20;
+      ) * 0.20 * delta;
 
 
     target.vy +=
       (
         finger.y -
         target.y
-      ) * 0.20;
+      ) * 0.20 * delta;
 
 
-    target.vx *= 0.72;
+    target.vx *= Math.pow(0.72, delta);
 
-    target.vy *= 0.72;
+    target.vy *= Math.pow(0.72, delta);
 
 
     target.x +=
-      target.vx;
+      target.vx * delta;
 
     target.y +=
-      target.vy;
+      target.vy * delta;
 
   }
 
@@ -642,26 +680,26 @@ function updateTarget(){
       (
         freeX -
         target.x
-      ) * 0.018;
+      ) * 0.018 * delta;
 
 
     target.vy +=
       (
         freeY -
         target.y
-      ) * 0.018;
+      ) * 0.018 * delta;
 
 
-    target.vx *= 0.94;
+    target.vx *= Math.pow(0.94, delta);
 
-    target.vy *= 0.94;
+    target.vy *= Math.pow(0.94, delta);
 
 
     target.x +=
-      target.vx;
+      target.vx * delta;
 
     target.y +=
-      target.vy;
+      target.vy * delta;
 
   }
 
@@ -717,7 +755,7 @@ function updateTarget(){
    UPDATE ORGANISM
 ===================================================== */
 
-function updateOrganism(){
+function updateOrganism(delta = 1){
 
   for(
     let i = 0;
@@ -745,26 +783,26 @@ function updateOrganism(){
       (
         previous.x -
         node.x
-      ) * follow;
+      ) * follow * delta;
 
 
     node.vy +=
       (
         previous.y -
         node.y
-      ) * follow;
+      ) * follow * delta;
 
 
-    node.vx *= 0.72;
+    node.vx *= Math.pow(0.72, delta);
 
-    node.vy *= 0.72;
+    node.vy *= Math.pow(0.72, delta);
 
 
     node.x +=
-      node.vx;
+      node.vx * delta;
 
     node.y +=
-      node.vy;
+      node.vy * delta;
 
 
     /*
@@ -784,7 +822,7 @@ function updateOrganism(){
         i
       ) *
       wave *
-      0.16;
+      0.16 * delta;
 
 
     node.y +=
@@ -793,7 +831,7 @@ function updateOrganism(){
         i
       ) *
       wave *
-      0.16;
+      0.16 * delta;
 
   }
 
@@ -804,7 +842,7 @@ function updateOrganism(){
    DRAW TRAIL
 ===================================================== */
 
-function drawTrail(){
+function drawTrail(delta = 1){
 
   for(
     let i = trail.length - 1;
@@ -816,7 +854,7 @@ function drawTrail(){
       trail[i];
 
 
-    p.life -= 0.025;
+    p.life -= 0.025 * delta;
 
 
     if(p.life <= 0){
@@ -1125,7 +1163,7 @@ function drawOrganism(){
    PARTICLES
 ===================================================== */
 
-function updateParticles(){
+function updateParticles(delta = 1){
 
   ctx.save();
 
@@ -1144,17 +1182,17 @@ function updateParticles(){
       particles[i];
 
 
-    p.x += p.vx;
+    p.x += p.vx * delta;
 
-    p.y += p.vy;
-
-
-    p.vx *= 0.97;
-
-    p.vy *= 0.97;
+    p.y += p.vy * delta;
 
 
-    p.life -= 0.018;
+    p.vx *= Math.pow(0.97, delta);
+
+    p.vy *= Math.pow(0.97, delta);
+
+
+    p.life -= 0.018 * delta;
 
 
     ctx.beginPath();
@@ -1201,107 +1239,114 @@ function updateParticles(){
    MAIN ANIMATION LOOP
 ===================================================== */
 
-function animate(){
+function animate(timestamp){
 
-  time++;
+  if(!animationRunning){
 
+    return;
 
-  /*
-     RESET CANVAS TRANSFORM
-  */
-
-  ctx.setTransform(
-    DPR,
-    0,
-    0,
-    DPR,
-    0,
-    0
-  );
+  }
 
 
-  /*
-     BLACK BACKGROUND
-  */
-
-  ctx.fillStyle =
-    "#000";
+  /* Queue the next frame first so one transient drawing error cannot kill the loop. */
+  animationFrameId = requestAnimationFrame(animate);
 
 
-  ctx.fillRect(
-    0,
-    0,
-    W,
-    H
-  );
+  const now = Number.isFinite(timestamp)
+    ? timestamp
+    : performance.now();
+
+  const delta = lastFrameTimestamp === null
+    ? 1
+    : Math.min(
+        Math.max((now - lastFrameTimestamp) / (1000 / 60), 0),
+        2
+      );
+
+  lastFrameTimestamp = now;
+  time += delta;
 
 
-  /*
-     ATMOSPHERE
-  */
+  try{
 
-  const backgroundGlow =
-    ctx.createRadialGradient(
+    ctx.setTransform(
+      DPR,
+      0,
+      0,
+      DPR,
+      0,
+      0
+    );
+
+
+    updateTarget(delta);
+    updateOrganism(delta);
+
+
+    ctx.fillStyle = "#000";
+    ctx.fillRect(0, 0, W, H);
+
+
+    const backgroundGlow = ctx.createRadialGradient(
       target.x,
       target.y,
       0,
       target.x,
       target.y,
-      Math.max(W,H)*0.55
+      Math.max(W,H) * 0.55
     );
 
+    backgroundGlow.addColorStop(0, "rgba(30,255,190,.045)");
+    backgroundGlow.addColorStop(1, "rgba(0,0,0,0)");
 
-  backgroundGlow.addColorStop(
-    0,
-    "rgba(30,255,190,.045)"
-  );
-
-
-  backgroundGlow.addColorStop(
-    1,
-    "rgba(0,0,0,0)"
-  );
+    ctx.fillStyle = backgroundGlow;
+    ctx.fillRect(0, 0, W, H);
 
 
-  ctx.fillStyle =
-    backgroundGlow;
+    drawTrail(delta);
+    drawOrganism();
+    updateParticles(delta);
+
+  }catch(error){
+
+    /* Keep requesting frames and surface a useful diagnostic instead of freezing. */
+    console.error("Animation frame recovered after a drawing error:", error);
+    status.textContent = "ANIMATION RECOVERING";
+
+  }
+
+}
 
 
-  ctx.fillRect(
-    0,
-    0,
-    W,
-    H
-  );
+function startAnimation(){
+
+  if(animationRunning || document.hidden){
+
+    return;
+
+  }
 
 
-  /*
-     UPDATE
-  */
+  animationRunning = true;
+  lastFrameTimestamp = null;
+  animationFrameId = requestAnimationFrame(animate);
 
-  updateTarget();
-
-  updateOrganism();
+}
 
 
-  /*
-     DRAW
-  */
+function stopAnimation(){
 
-  drawTrail();
+  animationRunning = false;
 
-  drawOrganism();
+  if(animationFrameId !== null){
 
-  updateParticles();
+    cancelAnimationFrame(animationFrameId);
+    animationFrameId = null;
+
+  }
 
 
-  /*
-     NEXT FRAME
-  */
-
-  requestAnimationFrame(
-    animate
-  );
+  lastFrameTimestamp = null;
 
 }
 
@@ -1310,7 +1355,7 @@ function animate(){
    START
 ===================================================== */
 
-animate();
+startAnimation();
 
 })();
 
